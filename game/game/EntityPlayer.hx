@@ -47,4 +47,10 @@ class EntityPlayer extends Entity {
       );
     super.render(to, ox, oy);
   }
+  
+  override public function collisions(ent:Array<Entity>):Void {
+    super.collisions(ent);
+    x = x.clamp(20, GSGame.GWIDTH - 20);
+    y = y.clamp(20, GSGame.GHEIGHT - 20);
+  }
 }

@@ -4,11 +4,20 @@ class Actor {
   static var HID = 0;
   public static function hook():Hook return ["actor" => c -> {
       BMP_SOURCE = c;
+      PAL = c.cut(0, 104, 32, 1).palette();
+      BMP_SLOT_ICONS = Bitmap.fromColour(24, 24 * DriverPlayer.SLOT_COUNT * 2, 0);
+      for (i in 0...DriverPlayer.SLOT_COUNT * 2) {
+        BMP_SLOT_ICONS.blitAlphaRect(0, i * 24, (i % DriverPlayer.SLOT_COUNT) * 24, 160, 24, 24, BMP_SOURCE);
+      }
+      BMP_SLOT_ICONS = BMP_SLOT_ICONS.recolour(PAL[2]).under(BMP_SLOT_ICONS, 1, 1);
+      BMP_SLOT_ICONS.lock();
       BMP_CACHE = [];
       HID++;
     }];
   
   static var BMP_SOURCE:Bitmap;
+  public static var PAL:Array<Colour>;
+  public static var BMP_SLOT_ICONS:Bitmap;
   static var BMP_CACHE:Map<String, Bitmap> = [];
   
   public static function generate(to:ActorVisual):Bitmap {
@@ -39,16 +48,23 @@ class Actor {
     return this.visual = to;
   }
   
-  public function new(x:Int, y:Int, visual:ActorVisual) {
+  public function new(x:Int, y:Int, ?visual:ActorVisual) {
     this.x = x;
     this.y = y;
-    set_visual(visual);
+    if (visual != null) set_visual(visual);
   }
   
-  public function render(to:ISurface, ox:Int, oy:Int):Void {
+  public function render(to:ISurface, ?ox:Int = 0, ?oy:Int = 0):Void {
 #if JAM_DEBUG
-    if (lastHID != HID) updateVisual(visual);
+    if (lastHID != HID && visual != null) updateVisual(visual);
 #end
     to.blitAlpha(x + ox, y + oy, bmp);
+  }
+  
+  public function renderClip(to:ISurface, ox:Int, oy:Int, sx:Int, sy:Int, sw:Int, sh:Int):Void {
+#if JAM_DEBUG
+    if (lastHID != HID && visual != null) updateVisual(visual);
+#end
+    to.blitAlphaRect(x + ox, y + oy, sx, sy, sw, sh, bmp);
   }
 }

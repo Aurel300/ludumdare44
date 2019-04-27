@@ -46,9 +46,9 @@ class Level {
   static var levels:Array<LevelSpec> = [
       {
         waves: makeWaves([
-             Suspend(Type(Single(Pop1)))
+                 Suspend(Type(Single(Pop1)))
             ,MW, Suspend(LocX(-20, Type(Single(Pop1))))
-            ,MW, Suspend(LocX(20, Type(Single(Pop1))))
+            ,    Suspend(LocX(20, Type(Single(Pop1))))
             ,MW, Suspend(Type(Single(Pop1)))
           ])
       }
@@ -95,8 +95,7 @@ class Level {
       w.entities = [];
       activeWaves.push(w);
       if (w.suspend) {
-        nextProg = w.at;
-        break;
+        rangeMax = nextProg = w.at;
       }
     }
     prog = nextProg;
