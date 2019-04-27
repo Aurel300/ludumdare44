@@ -24,3 +24,26 @@
    - one-armed bandit
 
  - balance???
+
+## TODO ##
+
+ - . UI
+   - x slots
+   - . coin stack = HP
+   - - score, lives, bombs
+   - . level indicator
+   - - bonus points indicators
+   - - menu etc
+ - . player
+   - x graphics
+   - - powerups
+   - - upgrades
+ - - enemies
+   - . graphics
+   - - behaviour
+   - . waves
+ - - levels (5?)
+   - - backgrouns
+ - - shop
+ - - SFX
+ - - music

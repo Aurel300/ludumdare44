@@ -14,7 +14,7 @@ class Level {
         var x:Float = GSGame.GWIDTH / 2;
         var y:Float = -10.0;
         var finished:Level->Wave->Void = null;
-        var suspend:Null<Bool> = null;
+        var suspend:Bool = false;
         var speed:Null<Float> = null;
         function handleSpec(s:WaveSpec):Void {
           switch (s) {
@@ -43,13 +43,19 @@ class Level {
     return out;
   }
   
+  static var SW = Wait(1);
   static var levels:Array<LevelSpec> = [
       {
         waves: makeWaves([
-                 Suspend(Type(Single(Pop1)))
-            ,MW, Suspend(LocX(-20, Type(Single(Pop1))))
-            ,    Suspend(LocX(20, Type(Single(Pop1))))
-            ,MW, Suspend(Type(Single(Pop1)))
+             SW, (Type(Single(Pop1)))
+            ,SW, (LocX(-20, Type(Single(Pop1))))
+            ,    (LocX( 20, Type(Single(Pop1))))
+            ,SW, (LocX(-40, Type(Single(Pop1))))
+            ,    (LocX(  0, Type(Single(Pop1))))
+            ,    (LocX( 40, Type(Single(Pop1))))
+            ,SW, (LocX(-20, Type(Single(Pop1))))
+            ,    (LocX( 20, Type(Single(Pop1))))
+            ,SW, (Type(Single(Pop1)))
           ])
       }
     ];
@@ -87,7 +93,7 @@ class Level {
       } ];
     if (suspended) return;
     var rangeMin = prog;
-    var rangeMax = prog + (1000 / 60); // + delta;
+    var rangeMax = prog + (1 / 60); // + delta;
     var nextProg = rangeMax;
     while (waves.length > 0 && waves[0].at >= rangeMin && waves[0].at <= rangeMax) {
       var w = waves.shift();

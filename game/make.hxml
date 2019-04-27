@@ -4,6 +4,7 @@
 -D analyzer-optimize
 -D PLU_PLATFORM=js.canvas
 -lib hxsocketio
+-lib plu.mat
 -lib plu.std
 --macro plu.plat.js.canvas.Platform.init()
 -lib plu
