@@ -4,6 +4,19 @@ class GSGame extends GameState {
   public static var I:GSGame;
   
   public static function spawn(e:Entity):Void I.entities.push(e);
+  public static function particle(x:Float, y:Float, vx:Float, vy:Float):Void {
+    var actor = new Actor(x.floor() - 12, y.floor() - 12, null);
+    I.particles.push({
+         actor: actor
+        ,x: x
+        ,y: y
+        ,vx: vx.floor().clamp(-4, 4)
+        ,vy: vy.floor().clamp(-3, 3)
+        ,ovx: vx * .3
+        ,ovy: vy * .3
+        ,ph: 0
+      });
+  }
   
   public static final GX = 0;
   public static final GY = 0;
@@ -16,6 +29,7 @@ class GSGame extends GameState {
   public var entities:Array<Entity>;
   public var player:Entity;
   public var level:Level;
+  public var particles:Array<{actor:Actor, x:Float, y:Float, vx:Int, vy:Int, ovx:Float, ovy:Float, ph:Int}> = [];
   
   public function new() {
     I = this;
@@ -54,6 +68,16 @@ class GSGame extends GameState {
     
     win.fill(Colour.fromARGB32(0xFFAA0000));
     for (entity in entities) entity.render(win, GX + cameraX.tick(), GY + cameraY.tick());
+    
+    particles = [ for (p in particles) {
+        p.actor.particle(p.vx, p.vy, p.ph >> 1).render(win);
+        p.x += p.ovx;
+        p.y += p.ovy;
+        p.actor.x = p.x.floor() - 12;
+        p.actor.y = p.y.floor() - 12;
+        if (++p.ph >= 32) continue;
+        p;
+      } ];
     
     //"ui-template".singleton(0, Main.VHEIGHT - 37).render(win);
     "ui-bottom1".singleton(0, Main.VHEIGHT - 37).render(win);

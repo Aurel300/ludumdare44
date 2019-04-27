@@ -68,7 +68,6 @@ class DriverPlayer extends Driver {
     } else {
       sticking = SLOT_COUNT;
     }
-    trace(slotTypesDecided);
     for (i in 0...SLOT_COUNT) {
       if (slotTypes[i] != -1) continue;
       slotPos[i] = (slotPos[i] + slotVelocity[i].tick()) % (SLOT_TYPES * SLOT_TYPE_HEIGHT);

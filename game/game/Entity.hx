@@ -78,7 +78,13 @@ class Entity {
     if (type.match(Player) && other.type.match(Coin(true))) return;
     switch [zone, otherzone] {
       case [Collect, Attack]: hp++; other.rem = true;
-      case [Normal, Attack]: hp--; other.rem = true;
+      case [Normal, Attack]:
+      var mx = momentumX * 1.7 + other.momentumX * .3;
+      var my = momentumY * 1.7 + other.momentumY * .3;
+      for (i in 0...5) GSGame.particle(
+          other.x, other.y, Choice.nextFloat(-3, 3) + mx, Choice.nextFloat(-3, 3) + my
+        );
+      hp--; other.rem = true;
       case _:
     }
     update((driver, state, update) -> driver.collide(this, other, zone, otherzone, state, update));
