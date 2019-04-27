@@ -7,12 +7,3 @@ typedef Zone = {
     ,h:Int
     ,type:ZoneType
   };
-
-enum ZoneType {
-  Normal;
-  Shield;
-  Vulnerable;
-  Gun;
-  GunI(_:Int);
-  Collect;
-}

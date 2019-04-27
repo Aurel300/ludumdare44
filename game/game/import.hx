@@ -12,4 +12,6 @@ using StringTools;
 using plu.bmp.BitmapTools;
 using plu.Numbers;
 
+using game.ActorVisualTools;
 using game.EntityTools;
+using game.ZoneTools;

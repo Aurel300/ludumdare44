@@ -6,7 +6,11 @@ enum EntityType {
   Enemy;
   
   // trigger collisions
-  PlayerCoin;
-  EnemyCoin;
-  Powerup;
+  Coin(player:Bool);
+  
+  //
+  //// trigger collisions
+  //PlayerCoin;
+  //EnemyCoin;
+  //Powerup;
 }

@@ -16,7 +16,7 @@ class Driver {
     // override
   }
   
-  public function collide(entity:Entity, other:Entity, zone:Zone, state:DriverState, update:EntityUpdate):Void {
+  public function collide(entity:Entity, other:Entity, zone:ZoneType, otherzone:ZoneType, state:DriverState, update:EntityUpdate):Void {
     // override
   }
 }

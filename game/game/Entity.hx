@@ -10,13 +10,27 @@ class Entity {
   public var type:EntityType;
   public var x:Float = 0.0;
   public var y:Float = 0.0;
+  public var offX:Float = 0.0;
+  public var offY:Float = 0.0;
+  public var xi:Int = 0;
+  public var yi:Int = 0;
   public var rem:Bool = false;
   public var actors:Array<Actor> = [];
   public var zones:Array<Zone> = [];
+  public var locate:Map<ZoneType, {x:Int, y:Int}> = [];
+  
+  public var momentumX:Float = 0.0;
+  public var momentumY:Float = 0.0;
+  public var hp:Int = 0;
   
   public function new(id:String, type:EntityType) {
     this.id = id;
     this.type = type;
+  }
+  
+  function updateLocate(?zones:Array<Zone>):Void {
+    if (zones != null) this.zones = zones;
+    locate = [ for (zone in zones) zone.type => {x: zone.x + (zone.w >> 1), y: zone.y + (zone.h >> 1)} ];
   }
   
   private function update(f:Driver->DriverState->EntityUpdate->Void):Void {
@@ -39,10 +53,35 @@ class Entity {
   
   public function tick():Void {
     update((driver, state, update) -> driver.tick(this, state, update));
+    xi = x.floor();
+    yi = y.floor();
+    if (hp <= 0) rem = true;
   }
   
-  public function collide(other:Entity, zone:Zone):Void {
-    update((driver, state, update) -> driver.collide(this, other, zone, state, update));
+  public function collisions(ent:Array<Entity>):Void {
+    // TODO: optimise ?
+    function collideAll(zone:Zone, onTypes:Array<ZoneType>):Void {
+      for (other in ent) if (other != this) {
+        for (ozone in other.zones) {
+          if (onTypes.indexOf(ozone.type) != -1
+              && zone.collide(xi, yi, ozone, other.xi, other.yi)) other.collide(this, ozone.type, zone.type);
+        }
+      }
+    }
+    for (zone in zones) collideAll(zone, switch (zone.type) {
+        case Attack: [Normal, Collect];
+        case _: continue;
+      });
+  }
+  
+  public function collide(other:Entity, zone:ZoneType, otherzone:ZoneType):Void {
+    if (type.match(Player) && other.type.match(Coin(true))) return;
+    switch [zone, otherzone] {
+      case [Collect, Attack]: hp++; other.rem = true;
+      case [Normal, Attack]: hp--; other.rem = true;
+      case _:
+    }
+    update((driver, state, update) -> driver.collide(this, other, zone, otherzone, state, update));
   }
   
   public function render(to:ISurface, ox:Float, oy:Float):Void {

@@ -16,9 +16,12 @@ class EntityTools {
     entity.nextStates.shift();
   }
   
-  public static function driveWith(entity:Entity, drivers:Array<String>):Entity {
+  public static function driveWith(entity:Entity, drivers:Array<String>, ?states:Array<DriverState>):Entity {
     entity.nextDrivers = drivers.map(Driver.DRIVERS.get);
-    entity.nextStates = entity.nextDrivers.map(driver -> driver.initState(entity));
+    entity.nextStates = [ for (i in 0...entity.nextDrivers.length) {
+        if (states != null && i < states.length && states[i] != null) states[i];
+        else entity.nextDrivers[i].initState(entity);
+      } ];
     return entity;
   }
 }
