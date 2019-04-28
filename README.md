@@ -36,7 +36,6 @@
    - . powerups
    - - upgrades
  - - enemies
-   - . **waves**
    - - bosses ?
  - - levels (5?)
  - . GFX

@@ -18,8 +18,11 @@ typedef Wave = {
 enum WaveType {
   None;
   File(dx:Float, dy:Float, count:Int);
+  SineFile(dx:Float, dy:Float, amp:Float, wl:Float, wv:Float, count:Int);
   Elbow(dx:Float, count:Int);
   Upbow(dx:Float, count:Int);
+  Loop(loops:Float, radius:Float, rdelta:Float, count:Int);
+  Points(pts:Array<{x:Float, y:Float, at:Int}>, count:Int);
   Stop;
   StopFor(time:Int);
 }

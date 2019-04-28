@@ -76,12 +76,47 @@ class Level {
               ,SW, Speed(3, Loc(-40, 130, Type(Upbow(1, 4), Enemy(Dropper))))
               ,SW, Speed(3, Loc(40, 150, Type(Upbow(-1, 4), Enemy(Dropper))))
             */
+              //Suspend(Loc(-20, 50, Type(Stop, Enemy(ClawA))))
               //LocY(50, Type(HRight(5), Enemy(Pool)))
               //LocY(50, Spacing(70, Type(HRight(5), Enemy(Pinball))))
               //LocY(50, Spacing(100, Type(HRight(5), Enemy(GoldCashbag))))
-                        LocY(100, Speed(10, Type(StopFor(60), Enemy(GoldCashbag))))
-              ,Wait(3), Loc(-30, 80, Speed(10, Type(StopFor(50), Enemy(GoldCashbag))))
-              ,Wait(3), Loc( 30, 110, Speed(10, Type(StopFor(50), Enemy(GoldCashbag))))
+              //          LocY(100, Speed(10, Type(StopFor(60), Enemy(GoldCashbag))))
+              //,Wait(3), Loc(-30, 80, Speed(10, Type(StopFor(50), Enemy(GoldCashbag))))
+              //,Wait(3), Loc( 30, 110, Speed(10, Type(StopFor(50), Enemy(GoldCashbag))))
+              
+              // nice left-right sine lines
+              /*
+               LocY( 60, Type(SineFile(1, 0, .4, 1.2, 0.04, 5), Enemy(Pop1)))
+              ,LocY(100, Type(SineFile(1, 0, .4, 1.2, 0.05, 5), Enemy(Pop1)))
+              ,LocY(140, Type(SineFile(1, 0, .4, 1.2, 0.06, 5), Enemy(Pop1)))
+              ,Wait(5)
+              ,LocY( 60, Type(SineFile(-1, 0, .4, -1.2, 0.04, 5), Enemy(Pop1)))
+              ,LocY(100, Type(SineFile(-1, 0, .4, -1.2, 0.05, 5), Enemy(Pop1)))
+              ,LocY(140, Type(SineFile(-1, 0, .4, -1.2, 0.06, 5), Enemy(Pop1)))
+              */
+              
+              // LocY(100, Type(Loop(1, 40, 0, 5), Enemy(Pop1)))
+              //,LocY(200, Type(Loop(1, -40, 0, 5), Enemy(Pop1)))
+              //
+              //,Wait(5)
+              //
+              //,LocY(100, Speed(3, Type(Loop(1, 40, 0, 5), Enemy(Pop1))))
+              //,LocY(200, Speed(3, Type(Loop(1, -40, 0, 5), Enemy(Pop1))))
+              
+              Type(Points([
+                   {x: -100, y: 100, at: 0}
+                  ,{x: -50, y: 100, at: 100}
+                  ,{x: -50, y: 200, at: 200}
+                  ,{x: 50, y: 200, at: 300}
+                  ,{x: 50, y: 100, at: 400}
+                  ,{x: 100, y: 100, at: 500}
+                  ,{x: 300, y: 100, at: 600}
+                ], 5), Enemy(Pop1))
+              
+              //          LocY(100, Type(SineFile(1, 1, .8, 1.2, 0.05, 5), Enemy(Pop1)))
+              //,Wait(5), LocY(100, Type(SineFile(-1, 1, .8, -1.2, 0.05, 5), Enemy(Pop1)))
+              //,Wait(5), LocX(-20, Type(SineFile(0, -1, .8, 1.2, 0.05, 5), Enemy(Pop1)))
+              //,Wait(5), LocX(20, Type(SineFile(0, -1, .8, -1.2, 0.05, 5), Enemy(Pop1)))
             ])
         }
       ];
@@ -142,18 +177,24 @@ class Level {
     if (w.prog == 0) {
       switch (w.type) {
         case None: enemy();
-        case File(dx, dy, count):
+        case File(dx, dy, count) | SineFile(dx, dy, _, _, _, count):
         var start = findStart(w.x, w.y, dx, dy);
         for (i in 0...count) enemy(start.x, start.y);
         case Elbow(_, count): for (i in 0...count) enemy(w.x, -10);
         case Upbow(_, count): for (i in 0...count) enemy(w.x, GSGame.GHEIGHT - 10);
         case Stop | StopFor(_): var start = closestEdge(w.x, w.y); enemy(start.x, start.y);
+        case Loop(_, radius, _, count):
+        var dx = radius > 0 ? 1 : -1;
+        var start = findStart(w.x, w.y - radius.abs(), dx, 0);
+        for (i in 0...count) enemy(start.x, start.y);
+        case Points(pts, count): for (i in 0...count) enemy(pts[0].x + GSGame.GWIDTH / 2, pts[0].y);
         case _:
       }
     }
     switch (w.type) {
       case None | Stop | StopFor(_) if (w.prog == 0): spawn();
-      case File(_, _, count) | Elbow(_, count) | Upbow(_, count) if (w.prog % w.spacing == 0 && w.spawned < count): spawn();
+      case File(_, _, count) | SineFile(_, _, _, _, _, count) | Elbow(_, count)
+        | Upbow(_, count) | Loop(_, _, _, count) | Points(_, count) if (w.prog % w.spacing == 0 && w.spawned < count): spawn();
       case _:
     }
     return (switch (w.type) {
