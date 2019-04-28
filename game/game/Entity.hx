@@ -27,6 +27,7 @@ class Entity {
   public var momentumY:Float = 0.0;
   public var forwardX:Float = 0.0;
   public var forwardY:Float = 4.0;
+  public var worth:Int = 0;
   public var hp:Int = 0;
   public var hpRem:Bool = true;
   public var hpExplode:Bool = true;
@@ -55,7 +56,7 @@ class Entity {
   
   public function shoot(from:ZoneType, subtype:Int, strength:Int):Void {
     var loc = locate[from];
-    GSGame.spawn(new EntityCoin(x + loc.x, y + loc.y, momentumX * .1 + forwardX, momentumY * .1 + forwardY, true, subtype, strength));
+    GI.spawn(new EntityCoin(x + loc.x, y + loc.y, momentumX * .1 + forwardX, momentumY * .1 + forwardY, true, subtype, strength));
   }
   
   function explode():Void {
@@ -83,7 +84,7 @@ class Entity {
     }
     if (explodePhase < explodeLength) {
       for (i in 0...actors.length) {
-        if (explodePhase % 4 == 0) for (j in 0...explodePower - (explodePhase >> 1)) GSGame.particle(
+        if (explodePhase % 4 == 0) for (j in 0...explodePower - (explodePhase >> 1)) GI.particle(
              x + explodeActors[i].ax + Choice.nextFloat(-explodeActors[i].aw, explodeActors[i].aw) * .1
             ,y + explodeActors[i].ay + Choice.nextFloat(-explodeActors[i].ah, explodeActors[i].ah) * .1
             ,-explodeActors[i].vx + Choice.nextFloat(-explodeActors[i].aw, explodeActors[i].aw) * .2
@@ -124,13 +125,16 @@ class Entity {
     update((driver, state, update) -> driver.tick(this, state, update));
     xi = (x + offX).floor();
     yi = (y + offY).floor();
-    if (hp <= 0 && hpRem) rem = true;
+    if (hp <= 0 && hpRem && !rem) {
+      if (this != GI.player && worth != 0) GI.score(worth, x, y);
+      rem = true;
+    }
   }
   
   public function collisions(ent:Array<Entity>):Void {
     // TODO: optimise ?
     function collideAll(zone:Zone, onTypes:Array<ZoneType>):Void {
-      for (other in ent) if (other != this) {
+      for (other in ent) if (other != this && other.hp > 0) {
         for (ozone in other.zones) {
           if (onTypes.indexOf(ozone.type) != -1
               && zone.collide(xi, yi, ozone, other.xi, other.yi)) other.collide(this, ozone.type, zone.type);
@@ -151,7 +155,7 @@ class Entity {
       case [Normal, Attack]:
       var mx = momentumX * 1.7 + other.momentumX * .3;
       var my = momentumY * 1.7 + other.momentumY * .3;
-      for (i in 0...5) GSGame.particle(
+      for (i in 0...5) GI.particle(
           other.x, other.y, Choice.nextFloat(-3, 3) + mx, Choice.nextFloat(-3, 3) + my
         );
       hp -= other.hp; other.rem = true;

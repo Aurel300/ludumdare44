@@ -1,57 +1,66 @@
 package game;
 
 class Actor {
-  static var HID = 0;
-  public static function hook():Hook return ["actor" => c -> {
-      BMP_SOURCE = c;
-      PAL = c.cut(0, 104, 64, 1).palette();
-      BMP_SLOT_ICONS = Bitmap.fromColour(24, 24 * UISlots.SLOT_COUNT * 2, 0);
-      for (i in 0...UISlots.SLOT_COUNT * 2) {
-        BMP_SLOT_ICONS.blitAlphaRect(0, i * 24, (i % UISlots.SLOT_COUNT) * 24, 160, 24, 24, BMP_SOURCE);
-      }
-      BMP_SLOT_ICONS = BMP_SLOT_ICONS.recolour(PAL[2]).under(BMP_SLOT_ICONS, 1, 1);
-      BMP_SLOT_ICONS.lock();
-      if (PARTICLES == null) {
-        PARTICLES = [];
-        var curve = c.getRect(0, 88, 16, 16);
-        var ci = 0;
-        var steps = [ for (y in 0...16) {
-            var min = 16;
-            var max = 0;
-            for (x in 0...16) if (!curve[ci++].transparent) {
-              min = min.min(x);
-              max = max.max(x);
-            }
-            [min, max];
-          } ];
-        for (vy in -3...4) for (vx in -4...5) {
-          var rvx:Float = vx;
-          var rvy:Float = vy;
-          var x = 0.0;
-          var y = 0.0;
-          var pos = [ for (t in 0...16) {
-              x += vx * .2;
-              y += rvy * .2;
-              rvx *= .9;
-              rvy += 0.45;
-              {x: x, y: y};
-            } ];
-          for (t in 0...16) {
-            var vec = new Vector<Colour>(24 * 24);
-            for (i in steps[t][0]...steps[t][1] + 1) {
-              var p = pos[i];
-              var px = (p.x + 12).floor();
-              var py = (p.y + 12).floor();
-              if (!px.withinIE(0, 24) || !py.withinIE(0, 24)) continue;
-              vec[px + py * 24] = PAL[i == steps[t][1] ? 11 : 9];
-            }
-            PARTICLES['${vy}/${vx}/${t}'] = Bitmap.fromVector(24, 24, vec).outline(1, PAL[(11 - (t >> 1)).max(6)], false).lock();
+  static function reload():Void {
+    var c = Platform.assets.bitmaps["actor"];
+    BMP_SOURCE = c;
+    PAL = c.cut(0, 104, 64, 1).palette();
+    BMP_SLOT_ICONS = Bitmap.fromColour(24, 24 * UISlots.SLOT_TYPES * 2, 0);
+    for (i in 0...UISlots.SLOT_TYPES * 2) {
+      BMP_SLOT_ICONS.blitAlphaRect(0, i * 24, (i % UISlots.SLOT_TYPES) * 24, 160, 24, 24, BMP_SOURCE);
+    }
+    BMP_SLOT_ICONS = BMP_SLOT_ICONS.recolour(PAL[2]).under(BMP_SLOT_ICONS, 1, 1);
+    BMP_SLOT_ICONS.lock();
+    if (PARTICLES == null) {
+      PARTICLES = [];
+      var curve = c.getRect(0, 88, 16, 16);
+      var ci = 0;
+      var steps = [ for (y in 0...16) {
+          var min = 16;
+          var max = 0;
+          for (x in 0...16) if (!curve[ci++].transparent) {
+            min = min.min(x);
+            max = max.max(x);
           }
+          [min, max];
+        } ];
+      for (vy in -3...4) for (vx in -4...5) {
+        var rvx:Float = vx;
+        var rvy:Float = vy;
+        var x = 0.0;
+        var y = 0.0;
+        var pos = [ for (t in 0...16) {
+            x += vx * .2;
+            y += rvy * .2;
+            rvx *= .9;
+            rvy += 0.45;
+            {x: x, y: y};
+          } ];
+        for (t in 0...16) {
+          var vec = new Vector<Colour>(24 * 24);
+          for (i in steps[t][0]...steps[t][1] + 1) {
+            var p = pos[i];
+            var px = (p.x + 12).floor();
+            var py = (p.y + 12).floor();
+            if (!px.withinIE(0, 24) || !py.withinIE(0, 24)) continue;
+            vec[px + py * 24] = PAL[i == steps[t][1] ? 11 : 9];
+          }
+          PARTICLES['${vy}/${vx}/${t}'] = Bitmap.fromVector(24, 24, vec).outline(1, PAL[(11 - (t >> 1)).max(6)], false).lock();
         }
       }
-      BMP_CACHE = [];
-      HID++;
-    }];
+    }
+    BMP_CACHE = [];
+    HID++;
+  }
+  
+  static var HID = 0;
+  public static function hook():Hook return ["actor" => reload];
+  public static function load():Loader {
+    return [{
+         run: () -> { reload(); true; }
+        ,desc: "Generating actors ..."
+      }];
+  }
   
   static var BMP_SOURCE:Bitmap;
   public static var PAL:Array<Colour>;

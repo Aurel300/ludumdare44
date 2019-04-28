@@ -3,10 +3,46 @@ package game;
 class GSGame extends GameState {
   public static var I:GSGame;
   
-  public static function spawn(e:Entity):Void I.entities.push(e);
-  public static function particle(x:Float, y:Float, vx:Float, vy:Float):Void {
+  public static final GX = 0;
+  public static final GY = 0;
+  public static final GWIDTH = 200 - 24;
+  public static final GHEIGHT = 300 - 35;
+  public static final MAXLIVES = 6;
+  public static final MAXBOMBS = 6;
+  
+  public function playerDeath():Void {
+    if (playerAlive) {
+      lives--;
+      player.hp = 0;
+      playerAlive = false;
+    }
+  }
+  public function slot(types:Array<Int>):Void {
+    var tcount = [ for (i in 0...UISlots.SLOT_TYPES) 0 ];
+    var highest = 0;
+    for (t in types) {
+      tcount[t]++;
+      highest = highest.max(tcount[t]);
+    }
+    if (highest == types.length) {
+      switch (types[0]) {
+        case 0: // cherry
+        case 1: // seven
+        case 2: lives++; // life
+        case 3: bombs++; // bomb
+      }
+    } else {
+      score([0, 50, 500][highest]);
+    }
+  }
+  public function spawn(e:Entity):Void entities.push(e);
+  public function score(add:Int, ?x:Float, ?y:Float):Void {
+    scoreCount += add;
+    // TODO: bonus announce
+  }
+  public function particle(x:Float, y:Float, vx:Float, vy:Float):Void {
     var actor = new Actor(x.floor() - 12, y.floor() - 12, null);
-    I.particles.push({
+    particles.push({
          actor: actor
         ,x: x
         ,y: y
@@ -18,18 +54,17 @@ class GSGame extends GameState {
       });
   }
   
-  public static final GX = 0;
-  public static final GY = 0;
-  public static final GWIDTH = 200;
-  public static final GHEIGHT = 300 - 35;
-  
   public var cameraX = new Hyst(0, 0.9, 0);
   public var cameraY = new Hyst(0, 0.9, 0);
   
   public var entities:Array<Entity>;
   public var player:EntityPlayer;
   public var level:Level;
-  public var particles:Array<{actor:Actor, x:Float, y:Float, vx:Int, vy:Int, ovx:Float, ovy:Float, ph:Int}> = [];
+  public var particles:Array<{actor:Actor, x:Float, y:Float, vx:Int, vy:Int, ovx:Float, ovy:Float, ph:Int}>;
+  public var scoreCount:Int;
+  public var lives:Int;
+  public var bombs:Int;
+  public var playerAlive:Bool;
   
   public function new() {
     I = this;
@@ -45,7 +80,14 @@ class GSGame extends GameState {
         player = new EntityPlayer(GWIDTH / 2, GHEIGHT / 2)
       ];
     level = Level.playLevel(0);
+    particles = [];
+    scoreCount = 0;
+    lives = 3;
+    bombs = 2;
+    playerAlive = true;
     UIHP.reset(player);
+    UISlots.reset();
+    UITop.reset();
   }
   
   override public function to(from:GameState):Void {
@@ -53,7 +95,7 @@ class GSGame extends GameState {
   }
   
   override public function load():Void {
-    //Actor.BMP_SOURCE = 
+    
   }
   
   override public function tick(delta:Float):Void {
@@ -85,9 +127,11 @@ class GSGame extends GameState {
     
     UIHP.tick();
     UISlots.tick();
+    UITop.tick();
     
     //"ui-template".singleton(0, Main.VHEIGHT - 37).render(win);
     UIHP.render(win);
+    UITop.render(win);
     "ui-bottom1".singleton(0, Main.VHEIGHT - 37).render(win);
     for (i in 0...UISlots.SLOT_COUNT) {
       var oy = 0;

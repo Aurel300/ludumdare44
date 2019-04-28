@@ -31,7 +31,7 @@ class UIHP {
   }
   
   public static function tick():Void {
-    if (addPending.length > 0) {
+    if (addPending.length > 0 && coins.length < 96) {
       if (coinAddPhase == 0) {
         coins.push({
              actor: new Actor(0, -4, "ui-right-coin".visual())
@@ -59,6 +59,7 @@ class UIHP {
       coin.y += coin.vy;
       if (coin.y > maxY) {
         if (coin.vy > .5) coin.vy = -coin.vy * .86;
+        else coin.vy = 0;
         coin.y = maxY;
       }
       coin.actor.y = coin.y.floor();

@@ -12,6 +12,7 @@ class EntityEnemy extends Entity {
     switch (type) {
       case Pop1:
       hp = 1;
+      worth = 50;
       updateActors([
           new Actor(0, 0, "enemy-pop1".visual())
         ]);

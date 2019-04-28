@@ -29,8 +29,9 @@
 
  - . UI
    - x slots
-   - . **coin stack = HP**
-   - - score, lives, bombs
+   - x coin stack = HP
+     - - different types of coins
+   - x score, lives, bombs
    - . level indicator
    - - bonus points indicators
    - - menu etc
@@ -39,11 +40,11 @@
    - - powerups
    - - upgrades
  - - enemies
-   - . graphics
+   - . **graphics**
    - - behaviour
    - . waves
  - - levels (5?)
-   - - backgrouns
+   - - backgrounds
  - . GFX
    - x particles, explosions
  - - shop

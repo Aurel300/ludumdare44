@@ -1,3 +1,3 @@
 package game;
 
-typedef Hook = Map<String, Bitmap->Void>;
+typedef Hook = Map<String, Void->Void>;

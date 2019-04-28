@@ -76,7 +76,7 @@ class Level {
       case Single(t):
       if (w.prog == 0) {
         w.entities = [new EntityEnemy(t, w.x, w.y)];
-        w.entities.map(GSGame.spawn);
+        w.entities.map(GI.spawn);
       }
       w.entities.filter(e -> !e.rem).length == 0;
       case _: throw 'unknown wave type ${w.type}';

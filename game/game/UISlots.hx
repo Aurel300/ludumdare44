@@ -2,7 +2,7 @@ package game;
 
 class UISlots {
   public static inline final SLOT_COUNT = 3;
-  public static inline final SLOT_TYPES = 3;
+  public static inline final SLOT_TYPES = 4;
   public static inline final SLOT_TYPE_HEIGHT = 24.0;
   public static inline final SLOT_LEN = 20;
   public static inline final SLOT_VMIN = 10.0;
@@ -11,17 +11,25 @@ class UISlots {
   public static inline final SLOT_STICK_DISTANCE = 1.0;
   public static inline final SLOT_TIME = 100;
   
-  public static var slotPhase:Int = 0;
-  public static var slotPos:Array<Float> = [ for (i in 0...SLOT_COUNT) 0 ];
-  public static var slotVelocity:Array<Hyst> = [ for (i in 0...SLOT_COUNT) new Hyst(0, .89, 0) ];
-  public static var slotTypes:Array<Int> = [ for (i in 0...SLOT_COUNT) -1 ];
-  public static var slotTypesDecided = 0;
+  public static var slotPhase:Int;
+  public static var slotPos:Array<Float>;
+  public static var slotVelocity:Array<Hyst>;
+  public static var slotTypes:Array<Int>;
+  public static var slotTypesDecided:Int;
   
   public static var canRoll(get, never):Bool;
-  static function get_canRoll():Bool return slotTypesDecided == 3;
+  static function get_canRoll():Bool return slotTypesDecided == SLOT_COUNT;
+  
+  public static function reset():Void {
+    slotPhase = 0;
+    slotPos = [ for (i in 0...SLOT_COUNT) 0 ];
+    slotVelocity = [ for (i in 0...SLOT_COUNT) new Hyst(0, .89, 0) ];
+    slotTypes = [ for (i in 0...SLOT_COUNT) 0 ];
+    slotTypesDecided = 3;
+  }
   
   public static function roll():Void {
-    for (i in 0...SLOT_TYPES) {
+    for (i in 0...SLOT_COUNT) {
       slotVelocity[i].setTo(Choice.nextFloat(SLOT_VMIN, SLOT_VMAX));
       slotTypes[i] = -1;
     }
@@ -34,7 +42,7 @@ class UISlots {
     if (slotPhase != 0) {
       slotPhase++;
       for (i in 0...SLOT_COUNT) {
-        var diff = ((i + 1) * SLOT_LEN) - slotPhase;
+        var diff = ((i + 1) * SLOT_LEN) - (slotPhase - SLOT_LEN);
         if (diff.within(0, 16)) slotVelocity[i].setTo(SLOT_VIDLE);
         if (diff < 2) sticking = i + 1;
       }
@@ -53,6 +61,7 @@ class UISlots {
             slotTypes[i] = t;
             slotPos[i] = typePos;
             slotTypesDecided++;
+            if (slotTypesDecided == SLOT_COUNT) GI.slot(slotTypes);
             slotVelocity[i].setTo(0, true);
             break;
           }

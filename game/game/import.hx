@@ -6,11 +6,13 @@ import plu.event.Key;
 import plu.bmp.*;
 import jam.*;
 
+import plu.Platform;
 import plu.Platform.inputs as inputs;
 import game.GSGame.I as GI;
 
 using StringTools;
 using plu.bmp.BitmapTools;
+using plu.bmp.FontTools;
 using plu.Numbers;
 
 using game.ActorVisualTools;

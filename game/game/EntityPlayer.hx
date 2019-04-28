@@ -7,7 +7,7 @@ class EntityPlayer extends Entity {
     super("player", Player);
     this.moveTo(x, y);
     this.driveWith(["player"]);
-    hp = 10;
+    hp = 90;
     hpRem = false;
     explodePower = 16;
     forwardY = -4.0;
@@ -28,8 +28,11 @@ class EntityPlayer extends Entity {
     super.collide(other, zone, otherzone);
     switch [zone, otherzone] {
       case [Collect, Attack]:
+      GI.score(5);
       collectShift = 14;
-      UIHP.add(1, Normal);
+      UIHP.add(other.hp, Normal);
+      case [Normal, Attack]:
+      UIHP.drop(other.hp);
       case _:
     }
   }
@@ -58,6 +61,7 @@ class EntityPlayer extends Entity {
   
   override public function collisions(ent:Array<Entity>):Void {
     super.collisions(ent);
+    if (hp <= 0) GI.playerDeath();
     x = x.clamp(20, GSGame.GWIDTH - 20);
     y = y.clamp(20, GSGame.GHEIGHT - 20);
   }
