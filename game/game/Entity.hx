@@ -19,7 +19,8 @@ class Entity {
   public var zones:Array<Zone> = [];
   public var locate:Map<ZoneType, {x:Int, y:Int}> = [];
   
-  public var explodePhase:Int = 0;
+  public var explodePhase:Int = 4;
+  public var explodePower:Int = 0;
   public var explodeLength:Int = 0;
   public var explodeActors:Array<ExplodeParticle> = [];
   public var momentumX:Float = 0.0;
@@ -28,6 +29,7 @@ class Entity {
   public var forwardY:Float = 4.0;
   public var hp:Int = 0;
   public var hpRem:Bool = true;
+  public var hpExplode:Bool = true;
   
   public function new(id:String, type:EntityType) {
     this.id = id;
@@ -36,6 +38,14 @@ class Entity {
   
   function updateActors(?actors:Array<Actor>):Void {
     if (actors != null) this.actors = actors;
+    explodeLength = 0;
+    for (actor in actors) {
+      var aw = actor.bmp != null ? actor.bmp.width : 1;
+      var ah = actor.bmp != null ? actor.bmp.height : 1;
+      var area = aw * ah;
+      var mass = Math.sqrt(area);
+      explodeLength += mass.floor();
+    }
   }
   
   function updateLocate(?zones:Array<Zone>):Void {
@@ -50,15 +60,13 @@ class Entity {
   
   function explode():Void {
     if (explodePhase == 0) {
-      explodeLength = 0;
       explodeActors = [ for (actor in actors) {
           var aw = actor.bmp != null ? actor.bmp.width : 1;
           var ah = actor.bmp != null ? actor.bmp.height : 1;
           var ax = actor.x + aw / 2 + offX;
           var ay = actor.y + ah / 2 + offY;
-          var area = aw * (actor.bmp != null ? actor.bmp.height : 1);
+          var area = aw * ah;
           var mass = Math.sqrt(area);
-          explodeLength += mass.floor();
           {
              x: 0.0
             ,y: 0.0
@@ -75,7 +83,7 @@ class Entity {
     }
     if (explodePhase < explodeLength) {
       for (i in 0...actors.length) {
-        if (explodePhase % 4 == 0) for (j in 0...16 - (explodePhase >> 1)) GSGame.particle(
+        if (explodePhase % 4 == 0) for (j in 0...explodePower - (explodePhase >> 1)) GSGame.particle(
              x + explodeActors[i].ax + Choice.nextFloat(-explodeActors[i].aw, explodeActors[i].aw) * .1
             ,y + explodeActors[i].ay + Choice.nextFloat(-explodeActors[i].ah, explodeActors[i].ah) * .1
             ,-explodeActors[i].vx + Choice.nextFloat(-explodeActors[i].aw, explodeActors[i].aw) * .2
@@ -153,6 +161,10 @@ class Entity {
   }
   
   public function render(to:ISurface, ox:Float, oy:Float):Void {
+    if (hpExplode) {
+      if (hp > 0) explodePhase = 0;
+      else explode();
+    }
     for (actor in actors) actor.render(to, (x + ox + offX).floor(), (y + oy + offY).floor());
   }
 }

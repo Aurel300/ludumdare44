@@ -5,9 +5,9 @@ class Actor {
   public static function hook():Hook return ["actor" => c -> {
       BMP_SOURCE = c;
       PAL = c.cut(0, 104, 64, 1).palette();
-      BMP_SLOT_ICONS = Bitmap.fromColour(24, 24 * DriverPlayer.SLOT_COUNT * 2, 0);
-      for (i in 0...DriverPlayer.SLOT_COUNT * 2) {
-        BMP_SLOT_ICONS.blitAlphaRect(0, i * 24, (i % DriverPlayer.SLOT_COUNT) * 24, 160, 24, 24, BMP_SOURCE);
+      BMP_SLOT_ICONS = Bitmap.fromColour(24, 24 * UISlots.SLOT_COUNT * 2, 0);
+      for (i in 0...UISlots.SLOT_COUNT * 2) {
+        BMP_SLOT_ICONS.blitAlphaRect(0, i * 24, (i % UISlots.SLOT_COUNT) * 24, 160, 24, 24, BMP_SOURCE);
       }
       BMP_SLOT_ICONS = BMP_SLOT_ICONS.recolour(PAL[2]).under(BMP_SLOT_ICONS, 1, 1);
       BMP_SLOT_ICONS.lock();

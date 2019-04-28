@@ -29,7 +29,7 @@
 
  - . UI
    - x slots
-   - . coin stack = HP
+   - . **coin stack = HP**
    - - score, lives, bombs
    - . level indicator
    - - bonus points indicators

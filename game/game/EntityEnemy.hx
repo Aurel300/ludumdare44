@@ -12,9 +12,11 @@ class EntityEnemy extends Entity {
     switch (type) {
       case Pop1:
       hp = 1;
-      actors = [
+      updateActors([
           new Actor(0, 0, "enemy-pop1".visual())
-        ];
+        ]);
+      explodePower = 1;
+      explodeLength = 2;
       updateLocate([
           {x: 0, y: 0, w: 13, h: 17, type: Normal}
         ]);

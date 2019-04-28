@@ -9,6 +9,7 @@ class EntityPlayer extends Entity {
     this.driveWith(["player"]);
     hp = 10;
     hpRem = false;
+    explodePower = 16;
     forwardY = -4.0;
     updateActors([
          new Actor(-20, -20, "player-body".visual())
@@ -26,7 +27,9 @@ class EntityPlayer extends Entity {
   override public function collide(other:Entity, zone:ZoneType, otherzone:ZoneType):Void {
     super.collide(other, zone, otherzone);
     switch [zone, otherzone] {
-      case [Collect, Attack]: collectShift = 14;
+      case [Collect, Attack]:
+      collectShift = 14;
+      UIHP.add(1, Normal);
       case _:
     }
   }
@@ -49,7 +52,7 @@ class EntityPlayer extends Entity {
           0
         );
       explodePhase = 0;
-    } else explode();
+    }
     super.render(to, ox, oy);
   }
   

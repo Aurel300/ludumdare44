@@ -8,6 +8,7 @@ class EntityCoin extends Entity {
     momentumX = mx;
     momentumY = my;
     hp = strength;
+    hpExplode = false;
     var size = [5, 6, 7][subtype - 1];
     actors = [
         new Actor(0, 0, 'coin$subtype'.visual())

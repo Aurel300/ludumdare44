@@ -31,6 +31,9 @@ class ActorVisualTools {
       case "ui-bottom1": {x: 0, y: 120, w: 24, h: 40};
       case "ui-bottom-slot": {x: 24 + index * 32, y: 120, w: 32, h: 40};
       case "ui-slot-icon": {x: 0 + index * 24, y: 160, w: 24, h: 24};
+      case "ui-right1": {x: 216, y: 0, w: 24, h: 300 - 9};
+      case "ui-right2": {x: 216, y: 300 - 9, w: 24, h: 9};
+      case "ui-right-coin": {x: 240, y: 0 + index * 16, w: 24, h: 9};
       case "ui-template": {x: 0, y: 184, w: 177, h: 37};
       case _: throw 'no such visual $of';
     });

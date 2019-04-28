@@ -27,7 +27,7 @@ class GSGame extends GameState {
   public var cameraY = new Hyst(0, 0.9, 0);
   
   public var entities:Array<Entity>;
-  public var player:Entity;
+  public var player:EntityPlayer;
   public var level:Level;
   public var particles:Array<{actor:Actor, x:Float, y:Float, vx:Int, vy:Int, ovx:Float, ovy:Float, ph:Int}> = [];
   
@@ -45,6 +45,7 @@ class GSGame extends GameState {
         player = new EntityPlayer(GWIDTH / 2, GHEIGHT / 2)
       ];
     level = Level.playLevel(0);
+    UIHP.reset(player);
   }
   
   override public function to(from:GameState):Void {
@@ -64,7 +65,10 @@ class GSGame extends GameState {
     
     for (entity in entities) entity.tick();
     for (entity in entities) entity.collisions(entities);
-    entities = entities.filter(e -> !e.rem);
+    entities = entities.filter(e -> {
+        if (e.hpExplode && e.hp <= 0 && e.explodePhase < e.explodeLength) true;
+        else !e.rem;
+      });
     
     win.fill(Colour.fromARGB32(0xFFAA0000));
     for (entity in entities) entity.render(win, GX + cameraX.tick(), GY + cameraY.tick());
@@ -79,21 +83,25 @@ class GSGame extends GameState {
         p;
       } ];
     
+    UIHP.tick();
+    UISlots.tick();
+    
     //"ui-template".singleton(0, Main.VHEIGHT - 37).render(win);
+    UIHP.render(win);
     "ui-bottom1".singleton(0, Main.VHEIGHT - 37).render(win);
-    for (i in 0...DriverPlayer.SLOT_COUNT) {
+    for (i in 0...UISlots.SLOT_COUNT) {
       var oy = 0;
       var idx = 0;
       if (DriverPlayer.I.leverCooldown != 0) {
         oy = -1;
-        var diff = ((i + 1) * DriverPlayer.SLOT_LEN) - DriverPlayer.I.sinceLever;
+        var diff = ((i + 1) * UISlots.SLOT_LEN) - DriverPlayer.I.sinceLever;
         if (diff < 0) oy = 0;
         else if (diff < 16) idx = [2, 1][diff >> 3];
       }
       "ui-bottom-slot".singletonI('$i', 17 + 26 * i, Main.VHEIGHT - 37 + oy, idx).render(win);
       "ui-slot-icons".singleton(
           17 + 1 + 26 * i, Main.VHEIGHT + 4 - 37 + oy, -1
-        ).renderClip(win, 0, 0, 0, (DriverPlayer.I.slotPos[i]).floor(), 24, 32);
+        ).renderClip(win, 0, 0, 0, (UISlots.slotPos[i]).floor(), 24, 32);
     }
   }
 }
