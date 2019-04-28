@@ -1,8 +1,6 @@
 package game;
 
 class EntityPlayer extends Entity {
-  public var collectShift:Int = 0;
-  
   public function new(x:Float, y:Float) {
     super("player", Player);
     this.moveTo(x, y);
@@ -17,6 +15,8 @@ class EntityPlayer extends Entity {
         ,new Actor(-12, -15, "player-gun1".visual())
         ,new Actor(-21, -20, "player-lever".visual())
       ]);
+    hurtActors = [0];
+    collectActors = [{ai: 1, vis: "player-collect"}];
     updateLocate([
          {x: -9, y: -8, w: 17, h: 20, type: Normal}
         ,{x: 8, y: -3, w: 8, h: 11, type: Collect}
@@ -28,8 +28,7 @@ class EntityPlayer extends Entity {
     super.collide(other, zone, otherzone);
     switch [zone, otherzone] {
       case [Collect, Attack]:
-      GI.score(5);
-      collectShift = 14;
+      GI.score(4 + other.hp);
       UIHP.add(other.hp, Normal);
       case [Normal, Attack]:
       UIHP.drop(other.hp);
@@ -41,8 +40,6 @@ class EntityPlayer extends Entity {
     if (hp > 0) {
       // collect animation
       actors[1].y = -6 + ((collectShift >> 1) - 4).max(0);
-      actors[1].visual = "player-collect".visual(collectShift != 0 ? 1 : 0);
-      if (collectShift > 0) collectShift--;
       // gun animation
       actors[2].visual = "player-gun1".visual(
           DriverPlayer.I.sinceShot < 8 ? [1, 1, 2, 2, 2, 3, 3, 1][DriverPlayer.I.sinceShot] :
@@ -61,7 +58,6 @@ class EntityPlayer extends Entity {
   
   override public function collisions(ent:Array<Entity>):Void {
     super.collisions(ent);
-    if (hp <= 0) GI.playerDeath();
     x = x.clamp(20, GSGame.GWIDTH - 20);
     y = y.clamp(20, GSGame.GHEIGHT - 20);
   }

@@ -32,7 +32,7 @@ class UIHP {
   
   public static function tick():Void {
     if (addPending.length > 0 && coins.length < 96) {
-      if (coinAddPhase == 0) {
+      if (coinAddPhase == 0 || (addPending.length > 10 && coinAddPhase < ADD_INTERVAL - 3)) {
         coins.push({
              actor: new Actor(0, -4, "ui-right-coin".visual())
             ,dark: false
@@ -58,7 +58,7 @@ class UIHP {
       var coin = coins[i];
       coin.y += coin.vy;
       if (coin.y > maxY) {
-        if (coin.vy > .5) coin.vy = -coin.vy * .86;
+        if (coin.vy > .5) coin.vy = -coin.vy * (coins.length - i > 5 ? .2 : .86);
         else coin.vy = 0;
         coin.y = maxY;
       }

@@ -73,6 +73,7 @@ class Actor {
     if (to.post != null) for (post in to.post) ret = (switch (post) {
       case FlipH: ret.flipH();
       case FlipV: ret.flipV();
+      case Hurt: ret.recolour(PAL[5]);
       case _: throw 'invalid actor post ${post}';
     });
     return ret.lock();
@@ -97,6 +98,20 @@ class Actor {
     return this.visual = to;
   }
   
+  var tempStack:Array<{prev:ActorVisual, eff:ActorPost}> = [];
+  public function topTemp(eff:ActorPost, on:Bool):Void {
+    if (on) {
+      if (tempStack.length == 0 || tempStack[0].eff != eff) {
+        tempStack.unshift({prev: visual, eff: eff});
+        set_visual(visual.withAddedPost([eff]));
+      }
+    } else {
+      if (tempStack.length != 0 && tempStack[0].eff == eff) {
+        set_visual(tempStack.shift().prev);
+      }
+    }
+  }
+  
   public function new(x:Int, y:Int, ?visual:ActorVisual) {
     this.x = x;
     this.y = y;
@@ -115,7 +130,8 @@ class Actor {
 #if JAM_DEBUG
     if (lastHID != HID && visual != null) updateVisual(visual);
 #end
-    if (!hide) to.blitAlpha(x + ox, y + oy, bmp);
+    if (!hide && x.withinIE(-bmp.width, Main.VWIDTH) && y.withinIE(-bmp.height, Main.VHEIGHT))
+      to.blitAlpha(x + ox, y + oy, bmp);
   }
   
   public function renderClip(to:ISurface, ox:Int, oy:Int, sx:Int, sy:Int, sw:Int, sh:Int):Void {

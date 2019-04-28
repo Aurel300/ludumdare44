@@ -2,6 +2,7 @@ package game;
 
 typedef Wave = {
      type:WaveType
+    ,enemies:Array<EnemyType>
     ,x:Float
     ,y:Float
     ,at:Float
@@ -10,8 +11,11 @@ typedef Wave = {
     ,?speed:Float
     ,?prog:Int
     ,?entities:Array<Entity>
+    ,?spawned:Int
   };
 
 enum WaveType {
-  Single(t:EnemyType);
+  None;
+  File(dx:Float, dy:Float, count:Int);
+  Elbow(dx:Float, count:Int);
 }

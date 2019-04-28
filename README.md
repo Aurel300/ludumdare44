@@ -37,11 +37,11 @@
    - - menu etc
  - . player
    - x graphics
-   - - powerups
+   - . powerups
    - - upgrades
  - - enemies
    - . **graphics**
-   - - behaviour
+   - - **behaviour**
    - . waves
  - - levels (5?)
    - - backgrounds

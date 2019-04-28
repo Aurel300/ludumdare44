@@ -25,9 +25,12 @@ class ActorVisualTools {
       case "coin1": {x: 0, y: 72 + index * 8, w: 5, h: 5};
       case "coin2": {x: 8, y: 72 + index * 8, w: 6, h: 6};
       case "coin3": {x: 16, y: 72 + index * 8, w: 7, h: 7};
-      case "enemy-pop1": {x: 40, y: 0, w: 16, h: 24};
-      case "enemy-pop2": {x: 56, y: 0, w: 16, h: 24};
-      case "enemy-dispenser": {x: 72, y: 0, w: 16, h: 24};
+      case "enemy-collect-top": {x: 8, y: 40 + index * 16, w: 8, h: 9};
+      case "enemy-collect-bottom": {x: 16, y: 40 + index * 16, w: 8, h: 9};
+      case "enemy-pop1": {x: 40, y: 0 + index * 16, w: 13, h: 9};
+      case "enemy-pop2": {x: 56, y: 0 + index * 13, w: 13, h: 13};
+      case "enemy-dropper": {x: 72, y: 0, w: 11, h: 16};
+      case "enemy-claw-stick": {x: 72 + index * 16, y: 16, w: 16, h: 24};
       case "ui-bottom1": {x: 0, y: 120, w: 24, h: 40};
       case "ui-bottom-slot": {x: 24 + index * 32, y: 120, w: 32, h: 40};
       case "ui-slot-icon": {x: 0 + index * 24, y: 160, w: 24, h: 24};
@@ -43,5 +46,9 @@ class ActorVisualTools {
   
   public static function withPost(v:ActorVisual, post:Array<ActorPost>):ActorVisual {
     return {x: v.x, y: v.y, w: v.w, h: v.h, post: post};
+  }
+  
+  public static function withAddedPost(v:ActorVisual, post:Array<ActorPost>):ActorVisual {
+    return {x: v.x, y: v.y, w: v.w, h: v.h, post: v.post != null ? v.post.concat(post) : post};
   }
 }

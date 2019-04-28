@@ -6,8 +6,14 @@ class DriverPlayer extends Driver {
   public static inline final DEC = .05;
   public static inline final ACC = 3;
   public static inline final MAX = 1.9;
-  public static inline final CDMAX = 20;
+  public static var CDMAX = 20;
   public static inline final LDMAX = 100;
+  
+  public static function powerup(type:Powerup):Void {
+    I.powerups.push({len: 300, type: type});
+  }
+  
+  public var powerups:Array<{len:Int, type:Powerup}> = [];
   
   public var sinceShot(get, never):Int;
   private inline function get_sinceShot():Int return CDMAX - cooldown;
@@ -24,6 +30,18 @@ class DriverPlayer extends Driver {
   }
   
   override public function tick(entity:Entity, state:DriverState, update:EntityUpdate):Void {
+    var shotType = CoinType.Normal;
+    var shotCD = CDMAX;
+    powerups = [ for (p in powerups) {
+        switch (p.type) {
+          case MegaShot: shotType = Large;
+          case RapidFire: shotCD = 7;
+        }
+        p.len--;
+        if (p.len == 0) continue;
+        p;
+      } ];
+    
     inline function control(original:Float, neg:Bool, pos:Bool):Float {
       return (original * DEC + (entity.hp > 0 ? ACC.negpos(neg, pos) : 0)).clamp(-MAX, MAX);
     }
@@ -32,10 +50,9 @@ class DriverPlayer extends Driver {
     update.vx = entity.momentumX;
     update.vy = entity.momentumY;
     if (entity.hp > 0 && inputs.keysHeld[Space] && cooldown == 0) {
-      cooldown = CDMAX;
-      entity.hp--;
+      cooldown = shotCD;
       UIHP.drop(1);
-      entity.shoot(Gun, 1, 2);
+      entity.shoot(Gun, shotType, Normal);
       if (leverCooldown == 0 && UISlots.canRoll) {
         leverCooldown = LDMAX;
         UISlots.roll();

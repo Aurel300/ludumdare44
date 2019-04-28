@@ -26,8 +26,8 @@ class GSGame extends GameState {
     }
     if (highest == types.length) {
       switch (types[0]) {
-        case 0: // cherry
-        case 1: // seven
+        case 0: DriverPlayer.powerup(MegaShot); // cherry
+        case 1: DriverPlayer.powerup(RapidFire); // seven
         case 2: lives++; // life
         case 3: bombs++; // bomb
       }
@@ -71,7 +71,9 @@ class GSGame extends GameState {
     // initialise drivers
     new DriverBounds();
     new DriverConstant();
+    new DriverGravity();
     new DriverPlayer();
+    new DriverWave();
   }
   
   public function reset():Void {
@@ -100,8 +102,6 @@ class GSGame extends GameState {
   
   override public function tick(delta:Float):Void {
     level.tick(delta);
-    
-    if (Choice.nextFloat() < .02) spawn(new EntityCoin(40, 0, 0, 3, false, 2, 1));
     
     js.Browser.document.getElementById("fps").innerText = 'HP: ${player.hp} ENT: ${entities.length} FPS: ${1000.0 / delta}';
     

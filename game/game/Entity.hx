@@ -18,6 +18,10 @@ class Entity {
   public var actors:Array<Actor> = [];
   public var zones:Array<Zone> = [];
   public var locate:Map<ZoneType, {x:Int, y:Int}> = [];
+  public var phase:Int = 0;
+  public var hurtShow:Int = 0;
+  public var hurtActors:Array<Int> = [];
+  public var collectActors:Array<{ai:Int, vis:String}> = [];
   
   public var explodePhase:Int = 4;
   public var explodePower:Int = 0;
@@ -28,9 +32,12 @@ class Entity {
   public var forwardX:Float = 0.0;
   public var forwardY:Float = 4.0;
   public var worth:Int = 0;
+  public var dropCoin:Int = 0;
   public var hp:Int = 0;
   public var hpRem:Bool = true;
   public var hpExplode:Bool = true;
+  public var owner:Entity = null;
+  public var collectShift:Int = 0;
   
   public function new(id:String, type:EntityType) {
     this.id = id;
@@ -54,9 +61,15 @@ class Entity {
     locate = [ for (zone in zones) zone.type => {x: zone.x + (zone.w >> 1), y: zone.y + (zone.h >> 1)} ];
   }
   
-  public function shoot(from:ZoneType, subtype:Int, strength:Int):Void {
+  public function shoot(from:ZoneType, subtype:CoinType, ?hurtFor:CoinType):Void {
     var loc = locate[from];
-    GI.spawn(new EntityCoin(x + loc.x, y + loc.y, momentumX * .1 + forwardX, momentumY * .1 + forwardY, true, subtype, strength));
+    if (hurtFor == null) hurtFor = subtype;
+    hp -= hurtFor.coinValue();
+    GI.spawn(new EntityCoin(
+         x + loc.x + offX, y + loc.y + offY
+        ,momentumX * .1 + forwardX, momentumY * .1 + forwardY
+        ,this, subtype, false
+      ));
   }
   
   function explode():Void {
@@ -90,6 +103,7 @@ class Entity {
             ,-explodeActors[i].vx + Choice.nextFloat(-explodeActors[i].aw, explodeActors[i].aw) * .2
             ,-explodeActors[i].vy + Choice.nextFloat(-explodeActors[i].ah, explodeActors[i].ah) * .2
           );
+        if (i >= explodeActors.length) break;
         actors[i].x = explodeActors[i].ox + explodeActors[i].x.floor();
         actors[i].y = explodeActors[i].oy + explodeActors[i].y.floor();
         explodeActors[i].x += explodeActors[i].vx;
@@ -125,10 +139,22 @@ class Entity {
     update((driver, state, update) -> driver.tick(this, state, update));
     xi = (x + offX).floor();
     yi = (y + offY).floor();
-    if (hp <= 0 && hpRem && !rem) {
-      if (this != GI.player && worth != 0) GI.score(worth, x, y);
-      rem = true;
+    if (hp <= 0) {
+      hp = 0;
+      if (this == GI.player) GI.playerDeath();
+      if (hpRem && !rem) {
+        if (this != GI.player && worth != 0) GI.score(worth, x, y);
+        if (this != GI.player && dropCoin != 0) {
+          for (c in dropCoin.randomChange()) GI.spawn(new EntityCoin(
+             x + offX + Choice.nextFloat(-1, 1), y + offY + Choice.nextFloat(-2, 0)
+            ,momentumX * .1 + Choice.nextFloat(-1, 1), momentumY * .1 + Choice.nextFloat(-3, -1)
+            ,this, c, true
+          ));
+        }
+        rem = true;
+      }
     }
+    phase++;
   }
   
   public function collisions(ent:Array<Entity>):Void {
@@ -137,39 +163,52 @@ class Entity {
       for (other in ent) if (other != this && other.hp > 0) {
         for (ozone in other.zones) {
           if (onTypes.indexOf(ozone.type) != -1
-              && zone.collide(xi, yi, ozone, other.xi, other.yi)) other.collide(this, ozone.type, zone.type);
+              && zone.collide(xi, yi, ozone, other.xi, other.yi)) {
+            other.collide(this, ozone.type, zone.type);
+            break;
+          }
         }
       }
     }
     for (zone in zones) collideAll(zone, switch (zone.type) {
-        case Attack: [Normal, Collect];
+        case Attack: [Normal, Collect, Shield];
         case _: continue;
       });
   }
   
   public function collide(other:Entity, zone:ZoneType, otherzone:ZoneType):Void {
-    if (type.match(Player) && other.type.match(Coin(true))) return;
+    if (other.owner == this) return;
     switch [zone, otherzone] {
       case [Collect, Attack]:
-      hp += other.hp; other.rem = true;
+      hp += other.hp;
+      collectShift = 14;
+      other.rem = true;
       case [Normal, Attack]:
       var mx = momentumX * 1.7 + other.momentumX * .3;
       var my = momentumY * 1.7 + other.momentumY * .3;
       for (i in 0...5) GI.particle(
           other.x, other.y, Choice.nextFloat(-3, 3) + mx, Choice.nextFloat(-3, 3) + my
         );
-      hp -= other.hp; other.rem = true;
+      hp -= other.hp;
+      hurtShow += (3 * other.hp).min(40);
+      other.rem = true;
       case _:
     }
     update((driver, state, update) -> driver.collide(this, other, zone, otherzone, state, update));
   }
   
   public function render(to:ISurface, ox:Float, oy:Float):Void {
+    for (i in hurtActors) actors[i].topTemp(Hurt, hurtShow > 0);
+    for (c in collectActors) actors[c.ai].visual = c.vis.visual(collectShift != 0 ? 1 : 0);
     if (hpExplode) {
       if (hp > 0) explodePhase = 0;
       else explode();
     }
-    for (actor in actors) actor.render(to, (x + ox + offX).floor(), (y + oy + offY).floor());
+    for (actor in actors) {
+      actor.render(to, (x + ox + offX).floor(), (y + oy + offY).floor());
+    }
+    if (hurtShow > 0) hurtShow--;
+    if (collectShift > 0) collectShift--;
   }
 }
 
