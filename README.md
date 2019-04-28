@@ -44,6 +44,8 @@
    - . waves
  - - levels (5?)
    - - backgrouns
+ - . GFX
+   - x particles, explosions
  - - shop
  - - SFX
  - - music

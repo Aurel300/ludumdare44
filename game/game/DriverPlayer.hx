@@ -37,15 +37,17 @@ class DriverPlayer extends Driver {
   }
   
   override public function tick(entity:Entity, state:DriverState, update:EntityUpdate):Void {
-    entity.momentumX = (entity.momentumX * DEC + ACC.negpos(inputs.keysHeld[ArrowLeft], inputs.keysHeld[ArrowRight])).clamp(-MAX, MAX);
-    entity.momentumY = (entity.momentumY * DEC + ACC.negpos(inputs.keysHeld[ArrowUp], inputs.keysHeld[ArrowDown])).clamp(-MAX, MAX);
+    inline function control(original:Float, neg:Bool, pos:Bool):Float {
+      return (original * DEC + (entity.hp > 0 ? ACC.negpos(neg, pos) : 0)).clamp(-MAX, MAX);
+    }
+    entity.momentumX = control(entity.momentumX, inputs.keysHeld[ArrowLeft], inputs.keysHeld[ArrowRight]);
+    entity.momentumY = control(entity.momentumY, inputs.keysHeld[ArrowUp], inputs.keysHeld[ArrowDown]);
     update.vx = entity.momentumX;
     update.vy = entity.momentumY;
-    if (inputs.keysHeld[Space] && cooldown == 0) {
+    if (entity.hp > 0 && inputs.keysHeld[Space] && cooldown == 0) {
       cooldown = CDMAX;
       entity.hp--;
-      var loc = entity.locate[ZoneType.Gun];
-      GSGame.spawn(new EntityCoin(entity.x + loc.x, entity.y + loc.y, entity.momentumX * .1, entity.momentumY * .1 - 4, true));
+      entity.shoot(Gun, 1, 2);
       if (leverCooldown == 0 && slotTypesDecided == 3) {
         leverCooldown = LDMAX;
         for (i in 0...SLOT_TYPES) {

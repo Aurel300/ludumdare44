@@ -71,6 +71,7 @@ class Actor {
   
   public var x:Int = 0;
   public var y:Int = 0;
+  public var hide:Bool = false;
   public var lastHID = 0;
   public var bmp:Bitmap;
   
@@ -105,13 +106,13 @@ class Actor {
 #if JAM_DEBUG
     if (lastHID != HID && visual != null) updateVisual(visual);
 #end
-    to.blitAlpha(x + ox, y + oy, bmp);
+    if (!hide) to.blitAlpha(x + ox, y + oy, bmp);
   }
   
   public function renderClip(to:ISurface, ox:Int, oy:Int, sx:Int, sy:Int, sw:Int, sh:Int):Void {
 #if JAM_DEBUG
     if (lastHID != HID && visual != null) updateVisual(visual);
 #end
-    to.blitAlphaRect(x + ox, y + oy, sx, sy, sw, sh, bmp);
+    if (!hide) to.blitAlphaRect(x + ox, y + oy, sx, sy, sw, sh, bmp);
   }
 }
