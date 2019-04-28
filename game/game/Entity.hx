@@ -38,6 +38,7 @@ class Entity {
   public var hpExplode:Bool = true;
   public var owner:Entity = null;
   public var collectShift:Int = 0;
+  public var remTimer:Int = 0;
   
   public function new(id:String, type:EntityType) {
     this.id = id;
@@ -70,6 +71,18 @@ class Entity {
         ,momentumX * .1 + forwardX, momentumY * .1 + forwardY
         ,this, subtype, false
       ));
+  }
+  
+  public function spawn():Void {
+    // override
+  }
+  
+  public function death():Void {
+    // override
+  }
+  
+  public function hpDelta(delta:Int):Void {
+    hp += delta;
   }
   
   function explode():Void {
@@ -137,16 +150,21 @@ class Entity {
   
   public function tick():Void {
     update((driver, state, update) -> driver.tick(this, state, update));
+    if (remTimer > 0) {
+      remTimer--;
+      if (remTimer == 0) rem = true;
+    }
     xi = (x + offX).floor();
     yi = (y + offY).floor();
     if (hp <= 0) {
       hp = 0;
       if (this == GI.player) GI.playerDeath();
       if (hpRem && !rem) {
+        death();
         if (this != GI.player && worth != 0) GI.score(worth, x, y);
         if (this != GI.player && dropCoin != 0) {
           for (c in dropCoin.randomChange()) GI.spawn(new EntityCoin(
-             x + offX + Choice.nextFloat(-1, 1), y + offY + Choice.nextFloat(-2, 0)
+             x + Choice.nextFloat(-1, 1), y + Choice.nextFloat(-2, 0)
             ,momentumX * .1 + Choice.nextFloat(-1, 1), momentumY * .1 + Choice.nextFloat(-3, -1)
             ,this, c, true
           ));
@@ -172,6 +190,7 @@ class Entity {
     }
     for (zone in zones) collideAll(zone, switch (zone.type) {
         case Attack: [Normal, Collect, Shield];
+        case Blade: [Normal, Shield];
         case _: continue;
       });
   }
@@ -180,18 +199,20 @@ class Entity {
     if (other.owner == this) return;
     switch [zone, otherzone] {
       case [Collect, Attack]:
-      hp += other.hp;
+      hpDelta(other.hp);
       collectShift = 14;
       other.rem = true;
-      case [Normal, Attack]:
+      case [Normal, Attack | Blade]:
+      if (this != GI.player && other.owner != GI.player) return;
+      if (hurtShow > 4) return;
       var mx = momentumX * 1.7 + other.momentumX * .3;
       var my = momentumY * 1.7 + other.momentumY * .3;
       for (i in 0...5) GI.particle(
           other.x, other.y, Choice.nextFloat(-3, 3) + mx, Choice.nextFloat(-3, 3) + my
         );
-      hp -= other.hp;
+      hpDelta(-other.hp);
       hurtShow += (3 * other.hp).min(40);
-      other.rem = true;
+      if (otherzone.match(Attack)) other.rem = true;
       case _:
     }
     update((driver, state, update) -> driver.collide(this, other, zone, otherzone, state, update));

@@ -130,7 +130,7 @@ class Actor {
 #if JAM_DEBUG
     if (lastHID != HID && visual != null) updateVisual(visual);
 #end
-    if (!hide && x.withinIE(-bmp.width, Main.VWIDTH) && y.withinIE(-bmp.height, Main.VHEIGHT))
+    if (!hide && (x + ox).withinIE(-bmp.width, Main.VWIDTH) && (y + oy).withinIE(-bmp.height, Main.VHEIGHT))
       to.blitAlpha(x + ox, y + oy, bmp);
   }
   

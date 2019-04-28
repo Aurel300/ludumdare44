@@ -16,7 +16,7 @@ class EntityEnemy extends Entity {
     explodeLength = 2;
     var normType = type;
     switch (type) {
-      case Pop1 | SuPop1:
+      case Pop1 | SuPop1:/**************************************************/
       hp = 2;
       willShoot = true;
       worth = 50;
@@ -34,7 +34,7 @@ class EntityEnemy extends Entity {
       offX = -13 / 2;
       offY = -17 / 2;
       normType = Pop1;
-      case Pop2 | SuPop2:
+      case Pop2 | SuPop2:/**************************************************/
       hp = 4;
       willShoot = true;
       worth = 100;
@@ -53,7 +53,7 @@ class EntityEnemy extends Entity {
       offX = -13 / 2;
       offY = -21 / 2;
       normType = Pop2;
-      case Dropper:
+      case Dropper:/********************************************************/
       hp = 20;
       willShoot = true;
       worth = 200;
@@ -70,9 +70,9 @@ class EntityEnemy extends Entity {
       collectActors = [{ai: 1, vis: "enemy-collect-top"}];
       offX = -11 / 2;
       offY = -24 / 2;
-      case Claw:
+      case ClawA:/**********************************************************/
       hp = 30;
-      worth = 500;
+      worth = 2500;
       dropCoin = 50;
       updateActors([
            new Actor(0, 0, "enemy-claw-stick".visual())
@@ -85,6 +85,74 @@ class EntityEnemy extends Entity {
       collectActors = [{ai: 1, vis: "enemy-collect-bottom"}];
       offX = -16 / 2;
       offY = -24 / 2;
+      case ClawB:/**********************************************************/
+      hp = 1;
+      explodeLength = 60;
+      explodePower = 20;
+      worth = 0;
+      dropCoin = 5;
+      updateActors([ for (i in 0...12)
+          new Actor(0, i * 24, "enemy-claw-line".visual())
+        ].concat([
+          new Actor(0, 12 * 24, "enemy-claw-hook".visual())
+        ]));
+      updateLocate([
+           {x: 6, y: 0, w: 4, h: 12 * 24 + 4, type: Blade}
+          ,{x: 0, y: 12 * 24 + 4, w: 16, h: 12, type: Blade}
+        ]);
+      momentumY = 0;
+      dwBounds = false;
+      hurtActors = [];
+      offX = -16 / 2;
+      offY = -304;
+      case Pool:/***********************************************************/
+      hp = 15;
+      worth = 100;
+      dropCoin = 30;
+      updateActors([
+           new Actor(0, 0, "enemy-pool".visual())
+          ,new Actor(6, 3, "enemy-pool-ball".visual())
+          ,new Actor(12, 3, "enemy-pool-ball".visual(1))
+          ,new Actor(18, 4, "enemy-pool-ball".visual())
+          ,new Actor(1, 12, "enemy-pool-leg".visual())
+          ,new Actor(24, 12, "enemy-pool-leg".visual(1))
+        ]);
+      updateLocate([
+          {x: 0, y: 0, w: 27, h: 12, type: Normal}
+        ]);
+      offX = -27 / 2;
+      offY = -12 / 2;
+      case Pinball:/********************************************************/
+      hp = 60;
+      worth = 1000;
+      dropCoin = 50;
+      updateActors([
+           new Actor(0, 0, "enemy-pinball".visual())
+          ,new Actor(0, 11, "enemy-collect-bottom".visual())
+          ,new Actor(25, 11, "enemy-collect-bottom".visual())
+        ]);
+      updateLocate([
+           {x: 8, y: 0, w: 16, h: 34, type: Normal}
+          ,{x: 4, y: 18, w: 1, h: 1, type: GunI(0)}
+          ,{x: 28, y: 18, w: 1, h: 1, type: GunI(1)}
+          ,{x: 0, y: 11, w: 8, h: 9, type: Collect}
+          ,{x: 24, y: 11, w: 8, h: 9, type: Collect}
+        ]);
+      collectActors = [{ai: 1, vis: "enemy-collect-bottom"}, {ai: 2, vis: "enemy-collect-bottom"}];
+      offX = -32 / 2;
+      offY = -34 / 2;
+      case Cashbag | GoldCashbag:/******************************************/
+      hp = 1;
+      worth = 20;
+      dropCoin = 50; // + death()
+      updateActors([
+          new Actor(0, 0, "enemy-cashbag".visual(type.match(Cashbag) ? 0 : 1))
+        ]);
+      updateLocate([
+          {x: 0, y: 0, w: 16, h: 22, type: type.match(Cashbag) ? Normal : Shield}
+        ]);
+      offX = -16 / 2;
+      offY = -22 / 2;
     }
     suicidal = type.match(SuPop1 | SuPop2);
     enemyType = normType;
@@ -101,9 +169,38 @@ class EntityEnemy extends Entity {
   var suicidal = false;
   var willShoot = false;
   var wasHit = false;
+  var subs:Array<EntityEnemy>;
+  var playerSight = 0;
+  
+  override public function spawn():Void {
+    subs = (switch (enemyType) {
+        case ClawA: [new EntityEnemy(ClawB, x + 30, y - 16)];
+        case _: null;
+      });
+    if (subs == null) return;
+    for (s in subs) {
+      s.owner = this;
+      GI.spawn(s);
+    }
+  }
+  
+  override public function death():Void {
+    if (subs != null) for (s in subs) s.hp = 0;
+    switch (enemyType) {
+      case ClawB: remTimer = 60;
+      case Cashbag:
+      for (i in 0...50) GI.spawn(new EntityCoin(
+           x + Choice.nextFloat(-3, 3), y + Choice.nextFloat(-4, 0)
+          ,momentumX * .1 + Choice.nextFloat(-2, 2), momentumY * .1 + Choice.nextFloat(-5, -1)
+          ,this, Choice.nextBool() ? Large : Medium, true
+        ));
+      case _:
+    }
+  }
   
   override public function tick():Void {
     super.tick();
+    var player = GI.player;
     switch (enemyType) {
       case Pop1 | Pop2:
       var vis = (enemyType.match(Pop1) ? "enemy-pop1" : "enemy-pop2");
@@ -120,6 +217,57 @@ class EntityEnemy extends Entity {
       var mlen = 16;
       var mphase = (phase + 5) % mlen;
       if (mphase == mlen - 1) shoot(Gun, Medium);
+      case ClawA:
+      if (drivers.length > 0 && drivers[0].id == "wave") return;
+      var claw = subs[0];
+      var distCx = x - claw.x;
+      var distCy = y - claw.y;
+      var distPx = player.x - claw.x;
+      var distPy = player.y - claw.y;
+      var cpx = player.x - x;
+      momentumX = momentumX.lerp(
+          cpx.abs() < 20 ? (
+              x < 40 ? .5 :
+              x > GSGame.GWIDTH - 40 ? -.5 :
+              cpx > 0 ? -.5 : .5
+            ) : 0
+          ,.9
+        );
+      x += momentumX;
+      x = x.clamp(20, GSGame.GWIDTH - 20);
+      var limit = 12 - ((100 - player.y).max(0) * .3);
+      var sighted = distPx.abs() <= limit;
+      var frame = 0;
+      if (!sighted) {
+        playerSight = 0;
+        if (distCy.abs() < 20) {
+          claw.momentumX = claw.momentumX.lerp(distPx.clamp(-2, 2), .93);
+          frame = distPx > 0 ? 2 : 1;
+        }
+        claw.momentumY = claw.momentumY.lerp(distCy.clamp(-5, 1), .93);
+      } else {
+        playerSight++;
+        claw.momentumX = claw.momentumX.lerp(0, .5);
+        if (playerSight > 10) {
+          frame = 3;
+          claw.momentumY = claw.momentumY.lerp(distPy.clamp(-3, 6), .93);
+        }
+      }
+      actors[0].visual = "enemy-claw-stick".visual(frame);
+      case Pool:
+      if (Choice.nextFloat() < .05) {
+        actors[1].y = Choice.nextBool() ? 4 : 3;
+        actors[3].y = 7 - actors[1].y;
+      }
+      if (Choice.nextFloat() < .05) actors[2].x = 11 + Choice.nextMod(3);
+      if (Choice.nextFloat() < .03) actors[4].x = Choice.nextBool() ? 0 : 1;
+      if (Choice.nextFloat() < .03) actors[5].x = Choice.nextBool() ? 24 : 25;
+      case Pinball:
+      var mphase = phase % 20;
+      var sight1 = ((x - 12) - player.x).abs();
+      var sight2 = ((x + 12) - player.x).abs();
+      if (hp > 20 && sight1 < 30 && mphase == 0) shoot(GunI(0), sight1 < 8 ? Large : Medium);
+      if (hp > 20 && sight2 < 30 && mphase == 10) shoot(GunI(1), sight2 < 8 ? Large : Medium);
       case _:
     }
   }
@@ -131,6 +279,16 @@ class EntityEnemy extends Entity {
       zones.pop();
       wasHit = true;
       actors[0].visual = "enemy-pop2".visual(0);
+      other.rem = true;
+      case [GoldCashbag, Shield, Attack]:
+      if (other.owner == this) return;
+      hurtShow = 10;
+      for (i in 0...10) GI.spawn(new EntityCoin(
+           x + Choice.nextFloat(-3, 3), y + Choice.nextFloat(-4, 0)
+          ,momentumX * .1 + Choice.nextFloat(-2, 2), momentumY * .1 + Choice.nextFloat(-5, -1)
+          ,this, Choice.nextBool() ? Large : Medium, true
+        ));
+      other.rem = true;
       case _:
     }
   }

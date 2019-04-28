@@ -35,7 +35,10 @@ class GSGame extends GameState {
       score([0, 50, 500][highest]);
     }
   }
-  public function spawn(e:Entity):Void entities.push(e);
+  public function spawn(e:Entity):Void {
+    entities.push(e);
+    e.spawn();
+  }
   public function score(add:Int, ?x:Float, ?y:Float):Void {
     scoreCount += add;
     // TODO: bonus announce

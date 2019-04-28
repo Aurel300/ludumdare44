@@ -17,6 +17,7 @@ class Level {
         var finished:Level->Wave->Void = null;
         var suspend:Bool = false;
         var speed:Float = 1;
+        var spacing:Int = 30;
         function handleSpec(s:WaveSpec):Void {
           switch (s) {
             case MW | Wait(_) | At(_): throw '$s only valid at root';
@@ -28,12 +29,14 @@ class Level {
             case Loc(sx, sy, ss): x = GSGame.GWIDTH / 2 + sx; y = sy; handleSpec(ss);
             case Suspend(ss): suspend = true; handleSpec(ss);
             case Speed(sp, ss): speed = sp; handleSpec(ss);
+            case Spacing(sp, ss): spacing = sp; handleSpec(ss);
           }
         }
         handleSpec(spec);
         if (type == null) throw "no type for wave";
         {
            enemies: enemies
+          ,spacing: spacing
           ,type: type
           ,x: x
           ,y: y
@@ -67,9 +70,18 @@ class Level {
               ,Wait(3) ,Loc(-20, 50, Type(Elbow(1, 5), Enemy(Pop1)))
               
               ,Wait(3) ,LocY(60, Speed(.6, Type(HRight(15), Enemy(Pop1))))
-              ,LocY(30, Speed(.6, Type(HRight(16), Enemy(Dropper))))
+              ,LocY(30, Speed(.6, Type(HRight(16), Enemy(Dropper)))),
+*//*
+               Suspend(Loc(-20, 50, Type(Stop, Enemy(ClawA))))
+              ,SW, Speed(3, Loc(-40, 130, Type(Upbow(1, 4), Enemy(Dropper))))
+              ,SW, Speed(3, Loc(40, 150, Type(Upbow(-1, 4), Enemy(Dropper))))
             */
-              Enemy(Claw)
+              //LocY(50, Type(HRight(5), Enemy(Pool)))
+              //LocY(50, Spacing(70, Type(HRight(5), Enemy(Pinball))))
+              //LocY(50, Spacing(100, Type(HRight(5), Enemy(GoldCashbag))))
+                        LocY(100, Speed(10, Type(StopFor(60), Enemy(GoldCashbag))))
+              ,Wait(3), Loc(-30, 80, Speed(10, Type(StopFor(50), Enemy(GoldCashbag))))
+              ,Wait(3), Loc( 30, 110, Speed(10, Type(StopFor(50), Enemy(GoldCashbag))))
             ])
         }
       ];
@@ -118,6 +130,15 @@ class Level {
       }
       return {x: cx, y: cy};
     }
+    function closestEdge(cx:Float, cy:Float):{x:Float, y:Float} {
+      var leftDist = (cx - (-10)).abs();
+      var rightDist = (cx - (GSGame.GWIDTH + 10)).abs();
+      var topDist = (cy - (-10)).abs();
+      if (leftDist == rightDist) return {x: cx, y: -10};
+      if (leftDist < rightDist && leftDist < topDist) return {x: -10, y: cy};
+      if (rightDist < topDist) return {x: GSGame.GWIDTH + 10, y: cy};
+      return {x: cx, y: -10};
+    }
     if (w.prog == 0) {
       switch (w.type) {
         case None: enemy();
@@ -125,12 +146,14 @@ class Level {
         var start = findStart(w.x, w.y, dx, dy);
         for (i in 0...count) enemy(start.x, start.y);
         case Elbow(_, count): for (i in 0...count) enemy(w.x, -10);
+        case Upbow(_, count): for (i in 0...count) enemy(w.x, GSGame.GHEIGHT - 10);
+        case Stop | StopFor(_): var start = closestEdge(w.x, w.y); enemy(start.x, start.y);
         case _:
       }
     }
     switch (w.type) {
-      case None if (w.prog == 0): spawn();
-      case File(_, _, count) | Elbow(_, count) if (w.prog % 30 == 0 && w.spawned < count): spawn();
+      case None | Stop | StopFor(_) if (w.prog == 0): spawn();
+      case File(_, _, count) | Elbow(_, count) | Upbow(_, count) if (w.prog % w.spacing == 0 && w.spawned < count): spawn();
       case _:
     }
     return (switch (w.type) {
@@ -180,4 +203,5 @@ enum WaveSpec {
   Loc(x:Float, y:Float, s:WaveSpec);
   Suspend(s:WaveSpec);
   Speed(sp:Float, s:WaveSpec);
+  Spacing(sp:Int, s:WaveSpec);
 }

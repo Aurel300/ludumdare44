@@ -6,6 +6,7 @@ typedef Wave = {
     ,x:Float
     ,y:Float
     ,at:Float
+    ,spacing:Int
     ,?finished:Level->Wave->Void
     ,?suspend:Bool
     ,?speed:Float
@@ -18,4 +19,7 @@ enum WaveType {
   None;
   File(dx:Float, dy:Float, count:Int);
   Elbow(dx:Float, count:Int);
+  Upbow(dx:Float, count:Int);
+  Stop;
+  StopFor(time:Int);
 }

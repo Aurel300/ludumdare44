@@ -28,25 +28,19 @@
 ## TODO ##
 
  - . UI
-   - x slots
-   - x coin stack = HP
-     - - different types of coins
-   - x score, lives, bombs
    - . level indicator
+   - - different types of coins
    - - bonus points indicators
    - - menu etc
  - . player
-   - x graphics
    - . powerups
    - - upgrades
  - - enemies
-   - . **graphics**
-   - - **behaviour**
-   - . waves
+   - . **waves**
+   - - bosses ?
  - - levels (5?)
-   - - backgrounds
  - . GFX
-   - x particles, explosions
+   - - backgrounds
  - - shop
  - - SFX
  - - music

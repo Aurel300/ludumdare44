@@ -24,16 +24,12 @@ class EntityPlayer extends Entity {
       ]);
   }
   
-  override public function collide(other:Entity, zone:ZoneType, otherzone:ZoneType):Void {
-    super.collide(other, zone, otherzone);
-    switch [zone, otherzone] {
-      case [Collect, Attack]:
-      GI.score(4 + other.hp);
-      UIHP.add(other.hp, Normal);
-      case [Normal, Attack]:
-      UIHP.drop(other.hp);
-      case _:
-    }
+  override public function hpDelta(delta:Int):Void {
+    super.hpDelta(delta);
+    if (delta > 0) {
+      GI.score(4 + delta);
+      UIHP.add(delta, Normal);
+    } else UIHP.drop(-delta);
   }
   
   override public function render(to:ISurface, ox:Float, oy:Float):Void {
@@ -48,7 +44,7 @@ class EntityPlayer extends Entity {
       // lever animation
       actors[3].visual = "player-lever".visual(
           DriverPlayer.I.sinceLever < 32 ? [1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5][DriverPlayer.I.sinceLever >> 1] :
-          DriverPlayer.I.leverCooldown != 0 ? 6 :
+          !UISlots.canRoll ? 6 :
           0
         );
       explodePhase = 0;

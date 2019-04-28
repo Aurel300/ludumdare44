@@ -9,8 +9,8 @@ class EntityTools {
   
   public static function driveNext(entity:Entity):Void {
     if (entity.nextDrivers == null) {
-      entity.nextDrivers = entity.nextDrivers.copy();
-      entity.nextStates = entity.nextStates.copy();
+      entity.nextDrivers = entity.drivers.copy();
+      entity.nextStates = entity.states.copy();
     }
     entity.nextDrivers.shift();
     entity.nextStates.shift();

@@ -15,6 +15,24 @@ class DriverWave extends Driver {
         tmlerp = .95;
         if (entity.y < w.y) tmy = 1;
         else tmx = dx;
+        case Upbow(dx, _):
+        tmlerp = .95;
+        if (entity.y > w.y) tmy = -1;
+        else tmx = dx;
+        case Stop:
+        tmlerp = 0;
+        tmx = (w.x - entity.x).clamp(-1, 1);
+        tmy = (w.y - entity.y).clamp(-1, 1);
+        if (tmx.abs() < w.speed && tmy.abs() < w.speed) entity.driveNext();
+        case StopFor(time):
+        tmlerp = 0;
+        if (w.prog >= time) tmy = 1;
+        else {
+          tmx = (w.x - entity.x).clamp(-1, 1);
+          if ((w.x - entity.x).abs() < w.speed) entity.x = w.x;
+          tmy = (w.y - entity.y).clamp(-1, 1);
+          if ((w.y - entity.y).abs() < w.speed) entity.y = w.y;
+        }
         case _: tmy = 1;
       }
       entity.momentumX = entity.momentumX.lerp(tmx * w.speed, tmlerp);

@@ -3,7 +3,10 @@ package game;
 class Driver {
   public static var DRIVERS:Map<String, Driver> = [];
   
+  public var id:String;
+  
   private function new(id:String) {
+    this.id = id;
     DRIVERS[id] = this;
   }
   

@@ -31,6 +31,13 @@ class ActorVisualTools {
       case "enemy-pop2": {x: 56, y: 0 + index * 13, w: 13, h: 13};
       case "enemy-dropper": {x: 72, y: 0, w: 11, h: 16};
       case "enemy-claw-stick": {x: 72 + index * 16, y: 16, w: 16, h: 24};
+      case "enemy-claw-line": {x: 136, y: 0, w: 16, h: 24};
+      case "enemy-claw-hook": {x: 136, y: 24, w: 16, h: 16};
+      case "enemy-pool": {x: 88, y: 0, w: 27, h: 16};
+      case "enemy-pool-ball": {x: 120, y: 0 + index * 4, w: 3, h: 4};
+      case "enemy-pool-leg": {x: 120 + index * 2, y: 8, w: 2, h: 4};
+      case "enemy-pinball": {x: 152, y: 0, w: 32, h: 34};
+      case "enemy-cashbag": {x: 184 + index * 16, y: 0, w: 16, h: 22};
       case "ui-bottom1": {x: 0, y: 120, w: 24, h: 40};
       case "ui-bottom-slot": {x: 24 + index * 32, y: 120, w: 32, h: 40};
       case "ui-slot-icon": {x: 0 + index * 24, y: 160, w: 24, h: 24};
