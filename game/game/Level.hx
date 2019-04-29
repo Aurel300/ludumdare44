@@ -59,7 +59,7 @@ class Level {
       [
         {
           waves: makeWaves([
-            /*
+            
                LocY(50, Type(HRight(5), Enemy(Pop2)))
               ,Suspend(LocY(80, Type(HLeft(5), Enemy(Pop1))))
               ,MW
@@ -71,11 +71,11 @@ class Level {
               
               ,Wait(3) ,LocY(60, Speed(.6, Type(HRight(15), Enemy(Pop1))))
               ,LocY(30, Speed(.6, Type(HRight(16), Enemy(Dropper)))),
-*//*
+
                Suspend(Loc(-20, 50, Type(Stop, Enemy(ClawA))))
               ,SW, Speed(3, Loc(-40, 130, Type(Upbow(1, 4), Enemy(Dropper))))
               ,SW, Speed(3, Loc(40, 150, Type(Upbow(-1, 4), Enemy(Dropper))))
-            */
+            
               //Suspend(Loc(-20, 50, Type(Stop, Enemy(ClawA))))
               //LocY(50, Type(HRight(5), Enemy(Pool)))
               //LocY(50, Spacing(70, Type(HRight(5), Enemy(Pinball))))
@@ -103,7 +103,7 @@ class Level {
               //,LocY(100, Speed(3, Type(Loop(1, 40, 0, 5), Enemy(Pop1))))
               //,LocY(200, Speed(3, Type(Loop(1, -40, 0, 5), Enemy(Pop1))))
               
-              Type(Points([
+              ,Type(Points([
                    {x: -100, y: 100, at: 0}
                   ,{x: -50, y: 100, at: 100}
                   ,{x: -50, y: 200, at: 200}
@@ -137,7 +137,7 @@ class Level {
     inline function enemy(?ox:Float, ?oy:Float):Void {
       if (ox == null) ox = w.x;
       if (oy == null) oy = w.y;
-      trace(ox, oy);
+      //trace(ox, oy);
       var wpos = w.entities.length;
       var en = new EntityEnemy(w.enemies[wpos % w.enemies.length], ox, oy, Wave(w, wpos));
       w.entities.push(en);

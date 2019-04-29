@@ -12,6 +12,7 @@ class GSGame extends GameState {
   
   public function playerDeath():Void {
     if (playerAlive) {
+      Sfx.play("player_death");
       lives--;
       player.hp = 0;
       playerAlive = false;
@@ -39,8 +40,8 @@ class GSGame extends GameState {
     entities.push(e);
     e.spawn();
   }
-  public function score(add:Int, ?x:Float, ?y:Float):Void {
-    scoreCount += add;
+  public function score(add:Float, ?x:Float, ?y:Float):Void {
+    scoreCount += add * [.6, .8, 1.0, 1.2, 1.4][upBadness];
     // TODO: bonus announce
   }
   public function particle(x:Float, y:Float, vx:Float, vy:Float):Void {
@@ -64,10 +65,17 @@ class GSGame extends GameState {
   public var player:EntityPlayer;
   public var level:Level;
   public var particles:Array<{actor:Actor, x:Float, y:Float, vx:Int, vy:Int, ovx:Float, ovy:Float, ph:Int}>;
-  public var scoreCount:Int;
+  public var scoreCount:Float;
+  public var playerAlive:Bool;
+  
+  // stats and upgrades
   public var lives:Int;
   public var bombs:Int;
-  public var playerAlive:Bool;
+  public var upRapid:Int;
+  public var upMega:Int;
+  public var upArmour:Int;
+  public var upBadness:Int;
+  public var upCollector:Int;
   
   public function new() {
     I = this;
@@ -80,19 +88,28 @@ class GSGame extends GameState {
   }
   
   public function reset():Void {
+    lives = 3;
+    bombs = 2;
+    upRapid = 0;
+    upMega = 0;
+    upArmour = 0;
+    upBadness = 0;
+    upCollector = 0;
+    
     "ui-slot-icons".singleton(0, 0, -1).bmp = Actor.BMP_SLOT_ICONS;
     entities = [
         player = new EntityPlayer(GWIDTH / 2, GHEIGHT / 2)
       ];
-    level = Level.playLevel(0);
+    //level = Level.playLevel(0);
     particles = [];
     scoreCount = 0;
-    lives = 3;
-    bombs = 2;
     playerAlive = true;
+    
     UIHP.reset(player);
+    UIShop.reset();
     UISlots.reset();
     UITop.reset();
+    UIShop.show(true, 1);
   }
   
   override public function to(from:GameState):Void {
@@ -103,8 +120,10 @@ class GSGame extends GameState {
     
   }
   
+  override public function mouse(e:MouseEvent):Void UIShop.mouse(e);
+  
   override public function tick(delta:Float):Void {
-    level.tick(delta);
+    if (level != null) level.tick(delta);
     
     js.Browser.document.getElementById("fps").innerText = 'HP: ${player.hp} ENT: ${entities.length} FPS: ${1000.0 / delta}';
     
@@ -128,27 +147,17 @@ class GSGame extends GameState {
         p;
       } ];
     
+    Sfx.tick();
     UIHP.tick();
+    UIShop.tick();
     UISlots.tick();
     UITop.tick();
     
     //"ui-template".singleton(0, Main.VHEIGHT - 37).render(win);
+    UIShop.render(win);
     UIHP.render(win);
     UITop.render(win);
     "ui-bottom1".singleton(0, Main.VHEIGHT - 37).render(win);
-    for (i in 0...UISlots.SLOT_COUNT) {
-      var oy = 0;
-      var idx = 0;
-      if (DriverPlayer.I.leverCooldown != 0) {
-        oy = -1;
-        var diff = ((i + 1) * UISlots.SLOT_LEN) - DriverPlayer.I.sinceLever;
-        if (diff < 0) oy = 0;
-        else if (diff < 16) idx = [2, 1][diff >> 3];
-      }
-      "ui-bottom-slot".singletonI('$i', 17 + 26 * i, Main.VHEIGHT - 37 + oy, idx).render(win);
-      "ui-slot-icons".singleton(
-          17 + 1 + 26 * i, Main.VHEIGHT + 4 - 37 + oy, -1
-        ).renderClip(win, 0, 0, 0, (UISlots.slotPos[i]).floor(), 24, 32);
-    }
+    UISlots.render(win);
   }
 }

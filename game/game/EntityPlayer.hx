@@ -10,13 +10,13 @@ class EntityPlayer extends Entity {
     explodePower = 16;
     forwardY = -4.0;
     updateActors([
-         new Actor(-20, -20, "player-body".visual())
-        ,new Actor(8, -6, "player-collect".visual())
-        ,new Actor(-12, -15, "player-gun1".visual())
+         new Actor(-12, -10, "player-body".visual(GI.upArmour))
+        ,new Actor(8, -6, 'player-collect${GI.upCollector}'.visual())
+        ,new Actor(-8, -15, 'player-gun${GI.upMega}'.visual())
         ,new Actor(-21, -20, "player-lever".visual())
       ]);
     hurtActors = [0];
-    collectActors = [{ai: 1, vis: "player-collect"}];
+    collectActors = [{ai: 1, vis: 'player-collect${GI.upCollector}'}];
     updateLocate([
          {x: -9, y: -8, w: 17, h: 20, type: Normal}
         ,{x: 8, y: -3, w: 8, h: 11, type: Collect}
@@ -24,12 +24,34 @@ class EntityPlayer extends Entity {
       ]);
   }
   
+  public function requip():Void {
+    actors[0].visual = "player-body".visual(GI.upArmour);
+    actors[1].visual = 'player-collect${GI.upCollector}'.visual();
+    actors[2].visual = 'player-gun${GI.upMega}'.visual();
+    collectActors = [{ai: 1, vis: 'player-collect${GI.upCollector}'}];
+    updateLocate([
+         {x: -9, y: -8, w: 17, h: 20, type: Normal}
+        ,{x: 8, y: -3, w: [8, 10, 12][GI.upCollector], h: 11, type: Collect}
+        ,{x: 0, y: -14, w: 1, h: 1, type: Gun}
+      ]);
+  }
+  
   override public function hpDelta(delta:Int):Void {
     super.hpDelta(delta);
     if (delta > 0) {
+      Sfx.play("player_collect");
       GI.score(4 + delta);
       UIHP.add(delta, Normal);
     } else UIHP.drop(-delta);
+  }
+  
+  override public function shoot(from:ZoneType, subtype:CoinType, ?hurtFor:CoinType):Void {
+    super.shoot(from, subtype, hurtFor);
+    Sfx.play("player_shoot" + (switch (subtype) {
+        case Large: "L";
+        case Medium: "M";
+        case Normal | _: "S";
+      }));
   }
   
   override public function render(to:ISurface, ox:Float, oy:Float):Void {
@@ -37,7 +59,7 @@ class EntityPlayer extends Entity {
       // collect animation
       actors[1].y = -6 + ((collectShift >> 1) - 4).max(0);
       // gun animation
-      actors[2].visual = "player-gun1".visual(
+      actors[2].visual = 'player-gun${GI.upMega}'.visual(
           DriverPlayer.I.sinceShot < 8 ? [1, 1, 2, 2, 2, 3, 3, 1][DriverPlayer.I.sinceShot] :
           0
         );

@@ -9,6 +9,7 @@ class UIHP {
   static var dropValue:Int = 0;
   static var coinAddPhase = 0;
   static var coinDropPhase = 0;
+  static var flying = 10000;
   
   public static function add(num:Int, type:CoinType):Void {
     for (i in 0...num) addPending.push(type);
@@ -16,6 +17,10 @@ class UIHP {
   
   public static function drop(value:Int):Void {
     dropValue += value;
+  }
+  
+  public static function bounce():Void {
+    for (i in 0...5.min(coins.length)) coins[0].vy = -3 + Choice.nextFloat(0, 1);
   }
   
   public static function reset(player:EntityPlayer):Void {
@@ -54,10 +59,13 @@ class UIHP {
     if (coinDropPhase > 0) coinDropPhase--;
     
     var maxY:Float = 300 - 5 - 9;
+    var nextFlying = 0;
     for (i in 0...coins.length) {
       var coin = coins[i];
       coin.y += coin.vy;
+      if (coin.vy.abs() > 2) nextFlying++;
       if (coin.y > maxY) {
+        if (coin.vy > 2.5 && Choice.nextFloat() < 1 / (1 + flying)) Sfx.play("side_coin");
         if (coin.vy > .5) coin.vy = -coin.vy * (coins.length - i > 5 ? .2 : .86);
         else coin.vy = 0;
         coin.y = maxY;
@@ -71,6 +79,7 @@ class UIHP {
         coin.dark = dark;
       }
     }
+    flying = nextFlying;
   }
 }
 

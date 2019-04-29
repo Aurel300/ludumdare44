@@ -18,15 +18,19 @@ class ActorVisualTools {
   
   public static function visual(of:String, ?index:Int = 0):ActorVisual {
     return (switch (of) {
-      case "player-body": {x: 0, y: 0, w: 40, h: 40};
-      case "player-collect": {x: 0, y: 40 + index * 16, w: 8, h: 16};
-      case "player-gun1": {x: 40, y: 40 + index * 16, w: 24, h: 16};
-      case "player-lever": {x: 64 + index * 12, y: 40, w: 12, h: 40};
+      case "player-body": {x: 0, y: 0 + index * 24, w: 24, h: 24};
+      case "player-collect0": {x: 72, y: 80 + index * 16, w: 16, h: 16};
+      case "player-collect1": {x: 72 + 16, y: 80 + index * 16, w: 16, h: 16};
+      case "player-collect2": {x: 72 + 32, y: 80 + index * 16, w: 16, h: 16};
+      case "player-gun0": {x: 24, y: 40 + index * 16, w: 16, h: 16};
+      case "player-gun1": {x: 24 + 16, y: 40 + index * 16, w: 16, h: 16};
+      case "player-gun2": {x: 24 + 32, y: 40 + index * 16, w: 16, h: 16};
+      case "player-lever": {x: 72 + index * 12, y: 40, w: 12, h: 40};
       case "coin1": {x: 0, y: 72 + index * 8, w: 5, h: 5};
       case "coin2": {x: 8, y: 72 + index * 8, w: 6, h: 6};
       case "coin3": {x: 16, y: 72 + index * 8, w: 7, h: 7};
-      case "enemy-collect-top": {x: 8, y: 40 + index * 16, w: 8, h: 9};
-      case "enemy-collect-bottom": {x: 16, y: 40 + index * 16, w: 8, h: 9};
+      case "enemy-collect-top": {x: 120, y: 80 + index * 16, w: 8, h: 9};
+      case "enemy-collect-bottom": {x: 128, y: 80 + index * 16, w: 8, h: 9};
       case "enemy-pop1": {x: 40, y: 0 + index * 16, w: 13, h: 9};
       case "enemy-pop2": {x: 56, y: 0 + index * 13, w: 13, h: 13};
       case "enemy-dropper": {x: 72, y: 0, w: 11, h: 16};
@@ -47,6 +51,11 @@ class ActorVisualTools {
       case "ui-life": {x: 0 + index * 16, y: 184, w: 16, h: 16};
       case "ui-bomb": {x: 32 + index * 16, y: 184, w: 16, h: 16};
       case "ui-template": {x: 0, y: 184, w: 177, h: 37};
+      case "shop-top": {x: 264, y: 0, w: 116, h: 88};
+      case "shop-bottom": {x: 264, y: 88, w: 116, h: 96};
+      case "shop-button": {x: 384, y: 0 + index * 32, w: 27, h: 27};
+      case "shop-slot": {x: 384, y: 96 + index * 48, w: 36, h: 44};
+      case "shop-item": {x: 240 + (index & 3) * 32, y: 184 + (index >> 2) * 40, w: 30, h: 38};
       case _: throw 'no such visual $of';
     });
   }

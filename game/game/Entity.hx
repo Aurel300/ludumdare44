@@ -87,6 +87,9 @@ class Entity {
   
   function explode():Void {
     if (explodePhase == 0) {
+      if (this == GI.player) Sfx.play("player_death");
+      else if (explodePower > 10) Sfx.play("ex_large");
+      else Sfx.play("ex_small");
       explodeActors = [ for (actor in actors) {
           var aw = actor.bmp != null ? actor.bmp.width : 1;
           var ah = actor.bmp != null ? actor.bmp.height : 1;
@@ -199,12 +202,15 @@ class Entity {
     if (other.owner == this) return;
     switch [zone, otherzone] {
       case [Collect, Attack]:
+      if (this == GI.player) Sfx.play("player_collect");
+      else Sfx.play("enemy_collect");
       hpDelta(other.hp);
       collectShift = 14;
       other.rem = true;
       case [Normal, Attack | Blade]:
       if (this != GI.player && other.owner != GI.player) return;
       if (hurtShow > 4) return;
+      Sfx.play("hit");
       var mx = momentumX * 1.7 + other.momentumX * .3;
       var my = momentumY * 1.7 + other.momentumY * .3;
       for (i in 0...5) GI.particle(

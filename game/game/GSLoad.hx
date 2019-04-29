@@ -11,6 +11,7 @@ class GSLoad extends GameState {
     loader = [ for (cat in [
          TextFragment.load()
         ,Actor.load()
+        ,Sfx.load()
       ]) for (sub in cat) sub ];
   }
   

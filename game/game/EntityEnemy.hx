@@ -239,6 +239,7 @@ class EntityEnemy extends Entity {
       var sighted = distPx.abs() <= limit;
       var frame = 0;
       if (!sighted) {
+        if (playerSight > 30) Sfx.play("claw_return");
         playerSight = 0;
         if (distCy.abs() < 20) {
           claw.momentumX = claw.momentumX.lerp(distPx.clamp(-2, 2), .93);
@@ -248,6 +249,7 @@ class EntityEnemy extends Entity {
       } else {
         playerSight++;
         claw.momentumX = claw.momentumX.lerp(0, .5);
+        if (playerSight == 16) Sfx.play("claw_launch");
         if (playerSight > 10) {
           frame = 3;
           claw.momentumY = claw.momentumY.lerp(distPy.clamp(-3, 6), .93);

@@ -31,15 +31,13 @@
    - . level indicator
    - - different types of coins
    - - bonus points indicators
-   - - menu etc
- - . player
-   - . powerups
-   - - upgrades
+   - - menu, intro, outro?
+ - - leaderboards
  - - enemies
+   - - badness
    - - bosses ?
- - - levels (5?)
+ - - **levels**
  - . GFX
    - - backgrounds
- - - shop
- - - SFX
+ - . SFX - throttle!
  - - music

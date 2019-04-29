@@ -61,6 +61,7 @@ class UISlots {
             slotTypes[i] = t;
             slotPos[i] = typePos;
             slotTypesDecided++;
+            Sfx.play("slot_decided");
             if (slotTypesDecided == SLOT_COUNT) GI.slot(slotTypes);
             slotVelocity[i].setTo(0, true);
             break;
@@ -70,6 +71,23 @@ class UISlots {
           if ((slotPos[i] - slotTypes[i] * SLOT_TYPE_HEIGHT).abs() < 0.5) slotPos[i] = slotTypes[i] * SLOT_TYPE_HEIGHT;
         }*/
       }
+    }
+  }
+  
+  public static function render(to:ISurface):Void {
+    for (i in 0...SLOT_COUNT) {
+      var oy = 0;
+      var idx = 0;
+      if (DriverPlayer.I.leverCooldown != 0) {
+        oy = -1;
+        var diff = ((i + 1) * SLOT_LEN) - DriverPlayer.I.sinceLever;
+        if (diff < 0) oy = 0;
+        else if (diff < 16) idx = [2, 1][diff >> 3];
+      }
+      "ui-bottom-slot".singletonI('$i', 17 + 26 * i, Main.VHEIGHT - 37 + oy, idx).render(to);
+      "ui-slot-icons".singleton(
+          17 + 1 + 26 * i, Main.VHEIGHT + 4 - 37 + oy, -1
+        ).renderClip(to, 0, 0, 0, (slotPos[i]).floor(), 24, 32);
     }
   }
 }

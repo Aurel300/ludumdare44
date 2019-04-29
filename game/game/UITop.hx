@@ -34,9 +34,10 @@ class UITop {
   }
   
   public static function tick():Void {
-    fragScore.text = '${Tx.gold()}Score: ' + '$score'.lpad("0", 8);
-    if (score != GI.scoreCount) {
-      var dabs = (score - GI.scoreCount).abs();
+    fragScore.text = '${Tx.gold()}Score: ' + '$score'.lpad("0", 8) + "\n" + Tx.setY(12) + Tx.normal() + ["x0.6", "x0.8", "", "x1.2", "x1.4"][GI.upBadness];
+    var gs = GI.scoreCount.floor();
+    if (score != gs) {
+      var dabs = (score - gs).abs();
       for (sig in [
            10000000
           ,1000000
@@ -48,7 +49,7 @@ class UITop {
           ,1
         ]) {
         if (dabs >= sig) {
-          if (score > GI.scoreCount) score -= sig;
+          if (score > gs) score -= sig;
           else score += sig;
         }
       }
@@ -77,7 +78,7 @@ class UITop {
   }
   
   public static function render(to:ISurface):Void {
-    to.blitAlpha(1, 2, fragScore.size(100, 20));
+    to.blitAlpha(1, 2, fragScore.size(100, 24));
     for (a in bombActors) a.render(to);
     for (a in lifeActors) a.render(to);
   }
