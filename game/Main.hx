@@ -17,6 +17,7 @@ class Main {
                 ,{alias: "nsbold", url: "png/nsbold8x16.png"}
               ]
             ,sounds: [
+#if !(NOSOUND)
  {alias: "bomb", url: "wav/bomb.wav"}
 ,{alias: "claw_launch", url: "wav/claw_launch.wav"}
 ,{alias: "claw_return", url: "wav/claw_return.wav"}
@@ -54,6 +55,7 @@ class Main {
 ,{alias: "slot_decided1", url: "wav/slot_decided1.wav"}
 ,{alias: "slot_decided2", url: "wav/slot_decided2.wav"}
 ,{alias: "slot_decided3", url: "wav/slot_decided3.wav"}
+#end
               ]
           }
       });

@@ -12,7 +12,6 @@ class DriverPlayer extends Driver {
   public static inline function cdMax():Int return [20, 17, 13, 9][GI.upRapid];
   
   public static function powerup(type:Powerup):Void {
-    Sfx.play("powerup");
     I.powerups.push({len: 300, type: type});
   }
   
@@ -72,7 +71,7 @@ class DriverPlayer extends Driver {
     }
     update.vx = entity.momentumX;
     update.vy = entity.momentumY;
-    if (canControl && inputs.keysHeld[Space] && cooldown == 0) {
+    if (canControl && inputs.keysHeld[Space] && cooldown == 0 && entity.hp > 1) {
       cooldown = shotCD;
       UIHP.drop(1);
       entity.shoot(Gun, shotType, Normal);

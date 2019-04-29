@@ -41,6 +41,7 @@ class ActorVisualTools {
       case "enemy-pool-ball": {x: 120, y: 0 + index * 4, w: 3, h: 4};
       case "enemy-pool-leg": {x: 120 + index * 2, y: 8, w: 2, h: 4};
       case "enemy-pinball": {x: 152, y: 0, w: 32, h: 34};
+      case "enemy-pinball-boss": {x: 184, y: 24 + index * 40, w: 32, h: 34};
       case "enemy-cashbag": {x: 184 + index * 16, y: 0, w: 16, h: 22};
       case "ui-bottom1": {x: 0, y: 120, w: 24, h: 40};
       case "ui-bottom-slot": {x: 24 + index * 32, y: 120, w: 32, h: 40};
@@ -50,7 +51,10 @@ class ActorVisualTools {
       case "ui-right-coin": {x: 240, y: 0 + index * 16, w: 24, h: 9};
       case "ui-life": {x: 0 + index * 16, y: 184, w: 16, h: 16};
       case "ui-bomb": {x: 32 + index * 16, y: 184, w: 16, h: 16};
-      case "ui-template": {x: 0, y: 184, w: 177, h: 37};
+      case "boss-icon": {x: 64, y: 184, w: 16, h: 16};
+      case "boss-bar-empty": {x: 80, y: 184, w: 80, h: 8};
+      case "boss-bar-full": {x: 80, y: 192, w: 80, h: 8};
+      //case "ui-template": {x: 0, y: 184, w: 177, h: 37};
       case "shop-top": {x: 264, y: 0, w: 116, h: 88};
       case "shop-bottom": {x: 264, y: 88, w: 116, h: 96};
       case "shop-button": {x: 384, y: 0 + index * 32, w: 27, h: 27};

@@ -34,11 +34,16 @@ class Entity {
   public var worth:Int = 0;
   public var dropCoin:Int = 0;
   public var hp:Int = 0;
+  public var initHp:Int = 0;
   public var hpRem:Bool = true;
   public var hpExplode:Bool = true;
   public var owner:Entity = null;
   public var collectShift:Int = 0;
   public var remTimer:Int = 0;
+  public var iframes:Int = 0;
+  
+  public var waveControl(get, never):Bool;
+  private inline function get_waveControl():Bool return drivers.length > 0 && drivers[0].id == "wave";
   
   public function new(id:String, type:EntityType) {
     this.id = id;
@@ -73,7 +78,7 @@ class Entity {
       ));
   }
   
-  public function spawn():Void {
+  public function spawn(?other:Array<Entity>):Void {
     // override
   }
   
@@ -81,7 +86,7 @@ class Entity {
     // override
   }
   
-  public function hpDelta(delta:Int):Void {
+  public function hpDelta(delta:Int, ?coinHit:Bool = true):Void {
     hp += delta;
   }
   
@@ -194,6 +199,7 @@ class Entity {
     for (zone in zones) collideAll(zone, switch (zone.type) {
         case Attack: [Normal, Collect, Shield];
         case Blade: [Normal, Shield];
+        case Normal: [Normal];
         case _: continue;
       });
   }
@@ -201,15 +207,19 @@ class Entity {
   public function collide(other:Entity, zone:ZoneType, otherzone:ZoneType):Void {
     if (other.owner == this) return;
     switch [zone, otherzone] {
+      case [Normal, Normal] if (iframes == 0 && hurtShow <= 4 && this == GI.player):
+      Sfx.play("hit");
+      other.hpDelta(-2);
+      hpDelta(-2);
+      hurtShow += 8;
       case [Collect, Attack]:
       if (this == GI.player) Sfx.play("player_collect");
       else Sfx.play("enemy_collect");
       hpDelta(other.hp);
       collectShift = 14;
       other.rem = true;
-      case [Normal, Attack | Blade]:
+      case [Normal, Attack | Blade] if (iframes == 0 && hurtShow <= 4):
       if (this != GI.player && other.owner != GI.player) return;
-      if (hurtShow > 4) return;
       Sfx.play("hit");
       var mx = momentumX * 1.7 + other.momentumX * .3;
       var my = momentumY * 1.7 + other.momentumY * .3;
@@ -225,13 +235,14 @@ class Entity {
   }
   
   public function render(to:ISurface, ox:Float, oy:Float):Void {
+    if (iframes > 0) iframes--;
     for (i in hurtActors) actors[i].topTemp(Hurt, hurtShow > 0);
     for (c in collectActors) actors[c.ai].visual = c.vis.visual(collectShift != 0 ? 1 : 0);
     if (hpExplode) {
       if (hp > 0) explodePhase = 0;
       else explode();
     }
-    for (actor in actors) {
+    if (iframes % 2 == 0) for (actor in actors) {
       actor.render(to, (x + ox + offX).floor(), (y + oy + offY).floor());
     }
     if (hurtShow > 0) hurtShow--;

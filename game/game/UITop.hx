@@ -20,6 +20,8 @@ class UITop {
           new Actor(GSGame.GWIDTH - 16 - i * 13, -16, "ui-bomb".visual());
         } ];
     }
+    for (a in lifeActors) a.y = -16;
+    for (a in bombActors) a.y = -16;
     score = 0;
     lives = 0;
     bombs = 0;

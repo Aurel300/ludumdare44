@@ -1,4 +1,5 @@
 -D JAM_DEBUG
+# -D NOSOUND
 -dce full
 -D js-es=6
 -D analyzer-optimize

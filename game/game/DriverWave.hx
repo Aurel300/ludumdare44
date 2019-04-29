@@ -26,7 +26,7 @@ class DriverWave extends Driver {
         tmlerp = .95;
         if (entity.y > w.y) tmy = -1;
         else tmx = dx;
-        case Stop:
+        case Stop | StopN(_):
         tmlerp = 0;
         tmx = (w.x - entity.x).clamp(-1, 1);
         tmy = (w.y - entity.y).clamp(-1, 1);

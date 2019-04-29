@@ -4,12 +4,13 @@ class UIHP {
   public static inline final ADD_INTERVAL = 10;
   public static inline final DROP_INTERVAL = 7;
   
-  public static var coins:Array<UIHPCoin> = [];
-  static var addPending:Array<CoinType> = [];
-  static var dropValue:Int = 0;
-  static var coinAddPhase = 0;
-  static var coinDropPhase = 0;
-  static var flying = 10000;
+  public static var coins:Array<UIHPCoin>;
+  static var text:TextFragment;
+  static var addPending:Array<CoinType>;
+  static var dropValue:Int;
+  static var coinAddPhase:Int;
+  static var coinDropPhase:Int;
+  static var flying:Int;
   
   public static function add(num:Int, type:CoinType):Void {
     for (i in 0...num) addPending.push(type);
@@ -24,6 +25,15 @@ class UIHP {
   }
   
   public static function reset(player:EntityPlayer):Void {
+    if (text == null) {
+      text = new TextFragment("0");
+    }
+    coins = [];
+    addPending = [];
+    dropValue = 0;
+    coinAddPhase = 0;
+    coinDropPhase = 0;
+    flying = 10000;
     add(player.hp, Normal);
   }
   
@@ -33,6 +43,8 @@ class UIHP {
       coin.actor.render(to, Main.VWIDTH - 24, 0);
     }
     "ui-right2".singleton(Main.VWIDTH - 24, 300 - 9).render(to);
+    text.text = '${Tx.gold()}${GI.player.hp}';
+    to.blitAlpha(Main.VWIDTH - 20, Main.VHEIGHT - 16, text.size(24, 20));
   }
   
   public static function tick():Void {

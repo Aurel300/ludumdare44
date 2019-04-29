@@ -4,11 +4,12 @@ class UIShop {
   public static var showing:Bitween = new Bitween(90);
   static var shopUI:UI;
   static var text:TextFragment;
-  static var buyCD:Int = 0;
+  static var buyCD:Int;
   static var items:Array<{item:ShopItem, bought:Int}>;
   
-  public static function show(on:Bool, ?level:Int):Void {
+  public static function show(on:Bool):Void {
     if (on) {
+      var level = GI.levelCount;
       var queue:Array<{item:ShopItem, lvl:Int, minLevel:Int}> = [
            {item: Rapid, lvl: 1, minLevel: 0}
           ,{item: Mega, lvl: 1, minLevel: 0}
@@ -55,9 +56,16 @@ class UIShop {
       return;
     }
     Sfx.play("shop_buy");
-    GI.player.hpDelta(-price);
+    GI.player.hpDelta(-price, false);
     items[item].item.buy();
     buyCD = 40;
+  }
+  
+  static function costText(?cost:Int):Void {
+    text = new TextFragment(
+          '${Tx.normal()}Cost:${Tx.gold()}${Tx.setX(30)}' + (cost != null ? '$cost' : "-")
+        + '\n${Tx.setY(13)}${Tx.normal()}Life:${Tx.gold()}${Tx.setX(30)}${GI.player.hp}'
+      );
   }
   
   public static function reset():Void {
@@ -70,12 +78,14 @@ class UIShop {
           ,"slot3" => Clickable(22 + 48, 36 + 56, 36, 44)
         ]);
       shopUI.click.subscribe(el -> if (showing.isOn && buyCD == 0) switch (el) {
-          case "button": show(false); // trigger next level
+          case "button": show(false); GI.levelStart(true);
           case "slot0" | "slot1" | "slot2" | "slot3": buy(el.charCodeAt(4) - "0".code);
           case _:
         });
-      text = new TextFragment('${Tx.normal()}Cost:${Tx.gold()}${Tx.setX(30)}90\n${Tx.setY(13)}${Tx.normal()}Life:${Tx.gold()}${Tx.setX(30)}90');
+      costText();
     }
+    items = [];
+    buyCD = 0;
     showing.setTo(false, true);
   }
   
@@ -98,6 +108,8 @@ class UIShop {
   }
   
   public static function render(to:ISurface):Void {
+    if (showing.isOff) return;
+    
     var bottomX = ((1 - bottomProg) * -GSGame.GWIDTH + 30).floor();
     var bottomY = topY + 86 - 6;
     
@@ -105,6 +117,9 @@ class UIShop {
     var buttonY = bottomY + 60;
     
     if (buyCD > 0) buyCD--;
+    
+    if (shopUI.hoverName != null && shopUI.hoverName.startsWith("slot")) costText(items[shopUI.hoverName.charCodeAt(4) - "0".code].item.price());
+    else costText();
     
     "shop-bottom".singleton(bottomX, bottomY).render(to);
     "shop-button".singleton(

@@ -35,8 +35,6 @@
  - - leaderboards
  - - enemies
    - - badness
-   - - bosses ?
- - - **levels**
  - . GFX
    - - backgrounds
  - . SFX - throttle!

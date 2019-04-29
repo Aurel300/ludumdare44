@@ -7,9 +7,10 @@ typedef Wave = {
     ,y:Float
     ,at:Float
     ,spacing:Int
-    ,?finished:Level->Wave->Void
-    ,?suspend:Bool
-    ,?speed:Float
+    ,suspend:Bool
+    ,bossWave:Bool
+    ,speed:Float
+    //,?finished:Level->Wave->Void
     ,?prog:Int
     ,?entities:Array<Entity>
     ,?spawned:Int
@@ -24,5 +25,6 @@ enum WaveType {
   Loop(loops:Float, radius:Float, rdelta:Float, count:Int);
   Points(pts:Array<{x:Float, y:Float, at:Int}>, count:Int);
   Stop;
+  StopN(count:Int);
   StopFor(time:Int);
 }

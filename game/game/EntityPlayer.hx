@@ -1,20 +1,13 @@
 package game;
 
 class EntityPlayer extends Entity {
-  public function new(x:Float, y:Float) {
+  public function new() {
     super("player", Player);
-    this.moveTo(x, y);
     this.driveWith(["player"]);
-    hp = 90;
     hpRem = false;
     explodePower = 16;
     forwardY = -4.0;
-    updateActors([
-         new Actor(-12, -10, "player-body".visual(GI.upArmour))
-        ,new Actor(8, -6, 'player-collect${GI.upCollector}'.visual())
-        ,new Actor(-8, -15, 'player-gun${GI.upMega}'.visual())
-        ,new Actor(-21, -20, "player-lever".visual())
-      ]);
+    respawn();
     hurtActors = [0];
     collectActors = [{ai: 1, vis: 'player-collect${GI.upCollector}'}];
     updateLocate([
@@ -24,7 +17,22 @@ class EntityPlayer extends Entity {
       ]);
   }
   
+  var armourChance = 0.0;
+  
+  public function respawn():Void {
+    hp = 50;
+    iframes = 80;
+    this.moveTo(GSGame.GWIDTH / 2, GSGame.GHEIGHT * .75);
+    updateActors([
+         new Actor(-12, -10, "player-body".visual(GI.upArmour))
+        ,new Actor(8, -6, 'player-collect${GI.upCollector}'.visual())
+        ,new Actor(-8, -15, 'player-gun${GI.upMega}'.visual())
+        ,new Actor(-21, -20, "player-lever".visual())
+      ]);
+  }
+  
   public function requip():Void {
+    armourChance = [0, 0.2, 0.4][GI.upArmour];
     actors[0].visual = "player-body".visual(GI.upArmour);
     actors[1].visual = 'player-collect${GI.upCollector}'.visual();
     actors[2].visual = 'player-gun${GI.upMega}'.visual();
@@ -36,8 +44,12 @@ class EntityPlayer extends Entity {
       ]);
   }
   
-  override public function hpDelta(delta:Int):Void {
-    super.hpDelta(delta);
+  override public function hpDelta(delta:Int, ?coinHit:Bool = true):Void {
+    if (coinHit && armourChance != 0 && Choice.nextFloat() < armourChance) {
+      Sfx.play("side_coin");
+      return;
+    }
+    super.hpDelta(delta, coinHit);
     if (delta > 0) {
       Sfx.play("player_collect");
       GI.score(4 + delta);

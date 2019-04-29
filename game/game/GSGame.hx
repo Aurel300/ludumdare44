@@ -13,7 +13,7 @@ class GSGame extends GameState {
   public function playerDeath():Void {
     if (playerAlive) {
       Sfx.play("player_death");
-      lives--;
+      respawnTimer++;
       player.hp = 0;
       playerAlive = false;
     }
@@ -26,6 +26,7 @@ class GSGame extends GameState {
       highest = highest.max(tcount[t]);
     }
     if (highest == types.length) {
+      Sfx.play("powerup");
       switch (types[0]) {
         case 0: DriverPlayer.powerup(MegaShot); // cherry
         case 1: DriverPlayer.powerup(RapidFire); // seven
@@ -36,9 +37,9 @@ class GSGame extends GameState {
       score([0, 50, 500][highest]);
     }
   }
-  public function spawn(e:Entity):Void {
+  public function spawn(e:Entity, ?other:Array<Entity>):Void {
     entities.push(e);
-    e.spawn();
+    e.spawn(other);
   }
   public function score(add:Float, ?x:Float, ?y:Float):Void {
     scoreCount += add * [.6, .8, 1.0, 1.2, 1.4][upBadness];
@@ -64,9 +65,11 @@ class GSGame extends GameState {
   public var entities:Array<Entity>;
   public var player:EntityPlayer;
   public var level:Level;
+  public var levelCount:Int;
   public var particles:Array<{actor:Actor, x:Float, y:Float, vx:Int, vy:Int, ovx:Float, ovy:Float, ph:Int}>;
   public var scoreCount:Float;
   public var playerAlive:Bool;
+  public var respawnTimer:Int;
   
   // stats and upgrades
   public var lives:Int;
@@ -90,26 +93,51 @@ class GSGame extends GameState {
   public function reset():Void {
     lives = 3;
     bombs = 2;
+    
     upRapid = 0;
     upMega = 0;
     upArmour = 0;
-    upBadness = 0;
+    upBadness = 2;
     upCollector = 0;
+    /*
+    upRapid = 3;
+    upMega = 2;
+    upArmour = 2;
+    upBadness = 4;
+    upCollector = 2;
+    */
     
     "ui-slot-icons".singleton(0, 0, -1).bmp = Actor.BMP_SLOT_ICONS;
     entities = [
-        player = new EntityPlayer(GWIDTH / 2, GHEIGHT / 2)
+        player = new EntityPlayer()
       ];
-    //level = Level.playLevel(0);
+    levelCount = 3;
     particles = [];
     scoreCount = 0;
     playerAlive = true;
+    respawnTimer = 0;
     
     UIHP.reset(player);
     UIShop.reset();
     UISlots.reset();
     UITop.reset();
-    UIShop.show(true, 1);
+    
+    levelStart();
+  }
+  
+  public function levelStart(?fromShop:Bool = false):Void {
+    entities = [player];
+    level = Level.playLevel(levelCount++);
+    if (fromShop) level.prog = -3.0;
+  }
+  
+  public function levelFinish():Void {
+    level = null;
+    if (levelCount >= Level.levels.length) {
+      // victory screen!
+    } else {
+      UIShop.show(true);
+    }
   }
   
   override public function to(from:GameState):Void {
@@ -124,6 +152,20 @@ class GSGame extends GameState {
   
   override public function tick(delta:Float):Void {
     if (level != null) level.tick(delta);
+    if (respawnTimer > 0) {
+      respawnTimer++;
+      if (respawnTimer == 90) {
+        respawnTimer = 0;
+        if (lives > 0) {
+          lives--;
+          player.respawn();
+          UIHP.reset(player);
+          playerAlive = true;
+        } else {
+          // actually game over!
+        }
+      }
+    }
     
     js.Browser.document.getElementById("fps").innerText = 'HP: ${player.hp} ENT: ${entities.length} FPS: ${1000.0 / delta}';
     
@@ -157,7 +199,24 @@ class GSGame extends GameState {
     UIShop.render(win);
     UIHP.render(win);
     UITop.render(win);
+    if (level != null && level.bosses.length > 0 && !level.bosses[0].waveControl) {
+      var totalHp = 0;
+      var totalInit = 0;
+      for (b in level.bosses) {
+        totalHp += b.hp;
+        totalInit += b.initHp;
+      }
+      var fillBar = 1 + ((totalHp / totalInit) * 78).floor();
+      "boss-icon".singleton(22, 14).render(win);
+      "boss-bar-empty".singleton(40, 16).render(win);
+      "boss-bar-full".singleton(40, 16).renderClip(win, 0, 0, 0, 0, fillBar, 8);
+    }
     "ui-bottom1".singleton(0, Main.VHEIGHT - 37).render(win);
     UISlots.render(win);
+  }
+  
+  override public function keyboard(e:KeyboardEvent) switch (e) {
+    case Up(KeyR): reset();
+    case _:
   }
 }

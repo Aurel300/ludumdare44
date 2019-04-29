@@ -21,9 +21,9 @@ class Sfx {
   public static function tick():Void if (counter > 0) counter--;
   
   public static function play(base:String, ?vol:Float = 1.0):Void {
-    //return; // DBG
-    
+#if !(NOSOUND)
     if (counter++ > 10) return;
     Platform.assets.sounds[Choice.nextElement(variations[base])].play(vol);
+#end
   }
 }
