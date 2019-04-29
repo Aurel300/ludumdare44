@@ -68,7 +68,7 @@ class Level {
       [
         {
            name: "Cadet 2000"
-          ,waves: makeWaves([MW
+          ,waves: makeWaves([Wait(8)
               ,         Loc(  0, 100, Type(StopFor(200), Enemy(Pop1)))
               ,Wait(2), Loc(-40, 100, Type(StopFor(200), Enemy(Pop1)))
               ,SW,      Loc( 40, 100, Type(StopFor(200), Enemy(Pop1)))
@@ -80,18 +80,17 @@ class Level {
               ,Suspend( Loc(-50, 200, Type(Stop, Enemy(Pool)))), MW
               
               ,         LocX(-40, Type(VDown(5), Enemy(Pop1)))
-              ,         LocX(  0, Speed(1.2, Type(VDown(5), Enemy(Pool))))
+              ,         LocX(  0, Speed(0.3, Type(VDown(2), Enemy(Pool))))
               ,         LocX( 40, Type(VDown(5), Enemy(Pop1)))
               ,Wait(5)
-              
-              ,         Loc(-30, 40, Spacing(15, Type(File( 1, 1, 10), Enemy(Pop2))))
-              ,Wait(5), Loc( 30, 40, Spacing(15, Type(File(-1, 1, 10), Enemy(Pop2))))
+              ,         Loc(-30, 40, Spacing(15, Speed(.6, Type(File( 1, 1, 7), Enemy(Pop2)))))
+              ,Wait(5), Loc( 30, 40, Spacing(15, Speed(.6, Type(File(-1, 1, 7), Enemy(Pop2)))))
               ,Wait(6), Loc(-30, 60, Spacing(20, Type(File( 1, 1, 15), Enemy(Pop1))))
               ,Wait(6), Loc( 30, 60, Spacing(20, Type(File(-1, 1, 15), Enemy(Pop1))))
-              ,Wait(3)
+              ,Wait(8)
               
               ,         LocX(-60, Type(VUp(5), Enemy(Pop2)))
-              ,         LocX(  0, Speed(1.2, Type(SineFile(0, 1, .4, 1.2, 0.05, 10), Enemy(Pool))))
+              ,         LocX(  0, Speed(0.8, Type(SineFile(0, 1, .4, 1.2, 0.05, 4), Enemy(Pool))))
               ,         LocX( 60, Type(VUp(5), Enemy(Pop2)))
               ,Wait(10)
               
@@ -295,6 +294,7 @@ class Level {
   
   public static function playLevel(n:Int):Level return new Level(levels[n]);
   
+  public var name:String;
   public var waves:Array<Wave>;
   public var bosses:Array<Entity> = [];
   public var activeWaves:Array<Wave> = [];
@@ -302,6 +302,7 @@ class Level {
   public var finishTimer:Int;
   
   private function new(spec:LevelSpec) {
+    name = spec.name;
     waves = spec.waves.copy();
     prog = 0.0;
     finishTimer = 0;
@@ -380,7 +381,7 @@ class Level {
   }
   
   public function tick(delta:Float):Void {
-    if (activeWaves.length == 0 && waves.length == 0) {
+    if (activeWaves.length == 0 && waves.length == 0 && GI.playerAlive) {
       finishTimer++;
       if (finishTimer >= 120) GI.levelFinish();
     }

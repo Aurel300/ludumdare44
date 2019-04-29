@@ -36,7 +36,7 @@ class UITop {
   }
   
   public static function tick():Void {
-    fragScore.text = '${Tx.gold()}Score: ' + '$score'.lpad("0", 8) + "\n" + Tx.setY(12) + Tx.normal() + ["x0.6", "x0.8", "", "x1.2", "x1.4"][GI.upBadness];
+    fragScore.text = '${Tx.gold()}Score: ' + '$score'.lpad("0", 8) + "\n" + Tx.setY(12) + Tx.normal() + ["x0.7", "", "x1.2", "x1.6"][GI.upBadness];
     var gs = GI.scoreCount.floor();
     if (score != gs) {
       var dabs = (score - gs).abs();
@@ -56,7 +56,7 @@ class UITop {
         }
       }
     }
-    function counter(cur:Int, target:Int, change:{phase:Int, adding:Bool}, vis:String, shift:Int, actors:Array<Actor>):Int {
+    function counter(cur:Int, target:Int, change:{phase:Int, adding:Bool}, vis:String, half:Bool, actors:Array<Actor>):Int {
       if (cur != target && change.phase == 0) {
         change.phase++;
         change.adding = (target > cur);
@@ -64,7 +64,8 @@ class UITop {
       if (change.phase != 0) {
         var mod = (change.adding ? cur : cur - 1);
         if (mod.withinIE(0, actors.length)) {
-          actors[mod].y = change.adding ? -16 + (change.phase >> shift) : -(change.phase >> shift);
+          var hph = (half ? change.phase >> 1 : change.phase);
+          actors[mod].y = change.adding ? -16 + hph : (half ? -hph : 16 - hph);
           actors[mod].visual = vis.visual(change.adding ? 0 : 1);
           change.phase++;
           if (change.phase == 32) {
@@ -75,8 +76,8 @@ class UITop {
       }
       return 0;
     }
-    lives += counter(lives, GI.lives, lifeChange, "ui-life", 1, lifeActors);
-    bombs += counter(bombs, GI.bombs, bombChange, "ui-bomb", 0, bombActors);
+    lives += counter(lives, GI.lives, lifeChange, "ui-life", true, lifeActors);
+    bombs += counter(bombs, GI.bombs, bombChange, "ui-bomb", false, bombActors);
   }
   
   public static function render(to:ISurface):Void {

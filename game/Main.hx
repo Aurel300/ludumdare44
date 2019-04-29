@@ -7,6 +7,8 @@ class Main {
   public static function main():Void {
     var g = new jam.Game([
          "load" => new GSLoad()
+        ,"intro" => new GSIntro()
+        ,"title" => new GSTitle()
         ,"game" => new GSGame()
       ], {
          window: {width: VWIDTH, height: VHEIGHT, scale: 2}
@@ -19,6 +21,7 @@ class Main {
             ,sounds: [
 #if !(NOSOUND)
  {alias: "bomb", url: "wav/bomb.wav"}
+,{alias: "bomb_alt", url: "wav/bomb_alt.wav"}
 ,{alias: "claw_launch", url: "wav/claw_launch.wav"}
 ,{alias: "claw_return", url: "wav/claw_return.wav"}
 ,{alias: "enemy_collect1", url: "wav/enemy_collect1.wav"}
@@ -55,6 +58,7 @@ class Main {
 ,{alias: "slot_decided1", url: "wav/slot_decided1.wav"}
 ,{alias: "slot_decided2", url: "wav/slot_decided2.wav"}
 ,{alias: "slot_decided3", url: "wav/slot_decided3.wav"}
+,{alias: "music", url: "wav/music.mp3"}
 #end
               ]
           }

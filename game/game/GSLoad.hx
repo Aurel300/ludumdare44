@@ -16,7 +16,7 @@ class GSLoad extends GameState {
   }
   
   override public function tick(delta:Float):Void {
-    win.fill(Colour.fromARGB32(0xFF0C0421));
+    win.fill(Colour.fromARGB32(0xFFE8E7DA));
     if (loader == null) return;
     if (loader.length > 0) {
       if (TextFragment.fonts != null) {
@@ -33,18 +33,17 @@ class GSLoad extends GameState {
         }
         hooks = true;
       }
-      loadText.text = "Click to start game";
-      if (Debug.autostart) game.state("game");
+      loadText.text = "Click to launch game";
+      if (Debug.autostart) game.state("intro");
     }
     if (TextFragment.fonts != null) {
-      win.fillRect(0, Main.VHEIGHT - 20, 300, 20, Colour.fromARGB32(0xFFE3CCA8));
       win.blitAlpha(4, Main.VHEIGHT - 16, loadText.size(292, 16));
     }
   }
   
   override public function mouse(e:plu.event.MouseEvent):Void switch (e) {
     case Up(_, _, _):
-    if (loader != null && loader.length == 0) game.state("game");
+    if (loader != null && loader.length == 0) game.state("intro");
     case _:
   }
 }

@@ -169,7 +169,7 @@ class Entity {
       if (this == GI.player) GI.playerDeath();
       if (hpRem && !rem) {
         death();
-        if (this != GI.player && worth != 0) GI.score(worth, x, y);
+        if (this != GI.player && worth != 0) GI.score(worth); //, x, y);
         if (this != GI.player && dropCoin != 0) {
           for (c in dropCoin.randomChange()) GI.spawn(new EntityCoin(
              x + Choice.nextFloat(-1, 1), y + Choice.nextFloat(-2, 0)
@@ -198,6 +198,7 @@ class Entity {
     }
     for (zone in zones) collideAll(zone, switch (zone.type) {
         case Attack: [Normal, Collect, Shield];
+        case Drop: [Collect];
         case Blade: [Normal, Shield];
         case Normal: [Normal];
         case _: continue;
@@ -208,19 +209,19 @@ class Entity {
     if (other.owner == this) return;
     switch [zone, otherzone] {
       case [Normal, Normal] if (iframes == 0 && hurtShow <= 4 && this == GI.player):
-      Sfx.play("hit");
+      Sfx.playThrottled("hit");
       other.hpDelta(-2);
       hpDelta(-2);
       hurtShow += 8;
-      case [Collect, Attack]:
-      if (this == GI.player) Sfx.play("player_collect");
-      else Sfx.play("enemy_collect");
+      case [Collect, Attack | Drop]:
+      if (this == GI.player) Sfx.playThrottled("player_collect");
+      else Sfx.playThrottled("enemy_collect");
       hpDelta(other.hp);
       collectShift = 14;
       other.rem = true;
       case [Normal, Attack | Blade] if (iframes == 0 && hurtShow <= 4):
       if (this != GI.player && other.owner != GI.player) return;
-      Sfx.play("hit");
+      Sfx.playThrottled("hit");
       var mx = momentumX * 1.7 + other.momentumX * .3;
       var my = momentumY * 1.7 + other.momentumY * .3;
       for (i in 0...5) GI.particle(

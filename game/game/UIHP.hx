@@ -51,7 +51,7 @@ class UIHP {
     if (addPending.length > 0 && coins.length < 96) {
       if (coinAddPhase == 0 || (addPending.length > 10 && coinAddPhase < ADD_INTERVAL - 3)) {
         coins.push({
-             actor: new Actor(0, -4, "ui-right-coin".visual())
+             actor: new Actor(Choice.nextFloat() < .2 ? (Choice.nextBool() ? 1 : -1) : 0, -4, "ui-right-coin".visual())
             ,dark: false
             ,y: -4
             ,vy: 1

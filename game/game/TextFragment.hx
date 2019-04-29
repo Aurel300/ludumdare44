@@ -32,6 +32,7 @@ class TextFragment {
                  NS => FontTools.fromBitmap(Platform.assets.bitmaps["ns"], 8, 16).autoKern(1)
                 ,NSBold => FontTools.fromBitmap(Platform.assets.bitmaps["nsbold"], 8, 16).autoKern(1)
               ];
+              /*
             var titleBase = bases[FontType.NSBold]
               .apply((b) -> b.scaleNN(2.3, 5)
                 .grow(1, 1, 1, 10)
@@ -39,10 +40,10 @@ class TextFragment {
                 .outline(1, Colour.BLACK, false).lock()
               ).autoKern(0);
             titleBase.lineHeight = 50;
-            bases[FontType.Title] = titleBase;
+            bases[FontType.Title] = titleBase;*/
             fonts = [];
             fontTS = i -> fonts[i].font;
-            fontIndex(NS, Colour.fromARGB32(0xFF0C0421));
+            fontIndex(NS, Colour.fromARGB32(0xFF34332A));
             true;
           }
         ,desc: "Generating fonts ..."
@@ -74,7 +75,7 @@ class TextFragment {
   
   function render(w:Int, h:Int):Bitmap {
     var ret = Bitmap.fromColour(w, h, 0);
-    fonts[0].font.render(ret, text, fontTS, w - 2);
+    fonts[0].font.render(ret, text, fontTS); //, w - 2);
     return ret.lock();
   }
   

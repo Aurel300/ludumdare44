@@ -2,7 +2,33 @@ package game;
 
 class Sfx {
   static var variations:Map<String, Array<String>> = [];
-  static var counter:Int = 0;
+  static var throttles:Map<String, Int> = [
+       "hit" => 0
+      ,"player_collect" => 0
+      ,"enemy_collect" => 0
+    ];
+  
+  public static var enableSound:Bool = true;
+  public static var enableMusic:Bool = true;
+  
+  public static function toggleSound():Void {
+    enableSound = !enableSound;
+  }
+  public static function toggleMusic():Void {
+    enableMusic = !enableMusic;
+  }
+  
+  static var musicChannel:plu.audio.IChannel;
+  
+  public static function music(on:Bool):Void {
+    if (on) {
+      if (enableMusic) {
+        musicChannel = Platform.assets.sounds["music"].play(Forever, .7);
+      }
+    } else {
+      if (musicChannel != null) musicChannel.stop();
+    }
+  }
   
   public static function load():Loader {
     return [{
@@ -18,11 +44,19 @@ class Sfx {
       }];
   }
   
-  public static function tick():Void if (counter > 0) counter--;
+  public static function tick():Void {
+    for (k in throttles.keys()) if (throttles[k] > 0) throttles[k]--;
+  }
+  
+  public static function playThrottled(base:String, ?vol:Float = 1.0):Void {
+    if (throttles[base] != 0) return;
+    throttles[base] = 16;
+    play(base, vol);
+  }
   
   public static function play(base:String, ?vol:Float = 1.0):Void {
+    if (!enableSound) return;
 #if !(NOSOUND)
-    if (counter++ > 10) return;
     Platform.assets.sounds[Choice.nextElement(variations[base])].play(vol);
 #end
   }

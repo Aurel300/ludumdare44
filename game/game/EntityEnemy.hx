@@ -34,8 +34,8 @@ class EntityEnemy extends Entity {
           ,new Actor(3, 0, "enemy-collect-top".visual())
         ]);
       updateLocate([
-           {x: 3, y: 0, w: 7, h: 9, type: Collect}
-          ,{x: 0, y: 8, w: 13, h: 9, type: Normal}
+          /* {x: 3, y: 0, w: 7, h: 9, type: Collect}
+          ,*/{x: 0, y: 8, w: 13, h: 9, type: Normal}
           ,{x: 6, y: 10, w: 1, h: 1, type: Gun}
         ]);
       collectActors = [{ai: 1, vis: "enemy-collect-top"}];
@@ -43,7 +43,7 @@ class EntityEnemy extends Entity {
       offY = -17 / 2;
       normType = Pop1;
       case Pop2 | SuPop2:/**************************************************/
-      hp = 4;
+      hp = 1;
       willShoot = true;
       worth = 100;
       dropCoin = 7;
@@ -52,8 +52,8 @@ class EntityEnemy extends Entity {
           ,new Actor(3, 0, "enemy-collect-top".visual())
         ]);
       updateLocate([
-           {x: 3, y: 0, w: 7, h: 9, type: Collect}
-          ,{x: 0, y: 8, w: 13, h: 9, type: Normal}
+          /* {x: 3, y: 0, w: 7, h: 9, type: Collect}
+          ,*/{x: 0, y: 8, w: 13, h: 9, type: Normal}
           ,{x: 6, y: 10, w: 1, h: 1, type: Gun}
           ,{x: 0, y: 17, w: 13, h: 4, type: Shield}
         ]);
@@ -62,7 +62,7 @@ class EntityEnemy extends Entity {
       offY = -21 / 2;
       normType = Pop2;
       case Dropper:/********************************************************/
-      hp = 20;
+      hp = 5;
       willShoot = true;
       worth = 200;
       dropCoin = 20;
@@ -114,9 +114,9 @@ class EntityEnemy extends Entity {
       offX = -16 / 2;
       offY = -304;
       case Pool:/***********************************************************/
-      hp = 15;
+      hp = 8;
       worth = 100;
-      dropCoin = 30;
+      dropCoin = 35;
       updateActors([
            new Actor(0, 0, "enemy-pool".visual())
           ,new Actor(6, 3, "enemy-pool-ball".visual())
@@ -131,7 +131,7 @@ class EntityEnemy extends Entity {
       offX = -27 / 2;
       offY = -12 / 2;
       case Pinball:/********************************************************/
-      hp = 60;
+      hp = 30;
       worth = 1000;
       dropCoin = 50;
       updateActors([
@@ -152,7 +152,7 @@ class EntityEnemy extends Entity {
       case Cashbag | GoldCashbag:/******************************************/
       hp = 1;
       worth = 20;
-      dropCoin = 20; // + death()
+      dropCoin = 15; // + death()
       updateActors([
           new Actor(0, 0, "enemy-cashbag".visual(type.match(Cashbag) ? 0 : 1))
         ]);
@@ -163,12 +163,14 @@ class EntityEnemy extends Entity {
       offY = -22 / 2;
     }
     if (boss) {
+      dwBounds = false;
       explodePower = 20;
       explodeLength = 60;
       hp *= (GI.levelCount == 1 ? 3 : (GI.levelCount == 2 ? 6 : 10));
       worth = GI.levelCount * 10000;
       dropCoin = 70;
     }
+    hp = (hp * [0.7, 1.0, 1.4, 2.0][GI.upBadness]).floor().max(1);
     initHp = hp;
     suicidal = type.match(SuPop1 | SuPop2);
     enemyType = normType;
@@ -186,9 +188,11 @@ class EntityEnemy extends Entity {
   var willShoot = false;
   var wasHit = false;
   var subs:Array<EntityEnemy>;
+  var waveOthers:Array<Entity>;
   var playerSight = 0;
   
   override public function spawn(?other:Array<Entity>):Void {
+    waveOthers = other;
     if (boss && enemyType.match(Pinball)) {
       bossA = other[0] == this;
       bossOther = cast other[bossA ? 1 : 0];
@@ -206,11 +210,23 @@ class EntityEnemy extends Entity {
   }
   
   override public function death():Void {
+    if (waveControl && waveOthers != null && waveOthers.length > 1 && !boss) {
+      var allDead = true;
+      for (o in waveOthers) if (o != this) {
+        if (o.hp > 0) {
+          allDead = false;
+          break;
+        }
+      }
+      if (allDead) {
+        GI.score(1000, x, y);
+      }
+    }
     if (subs != null) for (s in subs) s.hp = 0;
     switch (enemyType) {
       case ClawB: remTimer = 60;
       case Cashbag:
-      for (i in 0...(GI.levelCount == 3 ? 0 : 70)) GI.spawn(new EntityCoin(
+      for (i in 0...(GI.levelCount == 3 ? 0 : 10)) GI.spawn(new EntityCoin(
            x + Choice.nextFloat(-3, 3), y + Choice.nextFloat(-4, 0)
           ,momentumX * .1 + Choice.nextFloat(-2, 2), momentumY * .1 + Choice.nextFloat(-5, -1)
           ,this, Choice.nextBool() ? Large : Medium, true
@@ -328,8 +344,8 @@ class EntityEnemy extends Entity {
       var mphase = phase % 20;
       var sight1 = ((x - 12) - player.x).abs();
       var sight2 = ((x + 12) - player.x).abs();
-      if (hp > 20 && sight1 < 30 && mphase == 0) shoot(GunI(0), sight1 < 8 ? Large : Medium);
-      if (hp > 20 && sight2 < 30 && mphase == 10) shoot(GunI(1), sight2 < 8 ? Large : Medium);
+      if (hp > 6 && sight1 < 30 && mphase == 0) shoot(GunI(0), sight1 < 8 ? Large : Medium);
+      if (hp > 6 && sight2 < 30 && mphase == 10) shoot(GunI(1), sight2 < 8 ? Large : Medium);
       
       case _:
     }

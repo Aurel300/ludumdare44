@@ -19,9 +19,12 @@ class ActorVisualTools {
   public static function visual(of:String, ?index:Int = 0):ActorVisual {
     return (switch (of) {
       case "player-body": {x: 0, y: 0 + index * 24, w: 24, h: 24};
-      case "player-collect0": {x: 72, y: 80 + index * 16, w: 16, h: 16};
-      case "player-collect1": {x: 72 + 16, y: 80 + index * 16, w: 16, h: 16};
-      case "player-collect2": {x: 72 + 32, y: 80 + index * 16, w: 16, h: 16};
+      case "player-collect0-right": {x: 72, y: 80 + index * 10, w: 16, h: 10};
+      case "player-collect1-right": {x: 72 + 16, y: 80 + index * 10, w: 16, h: 10};
+      case "player-collect2-right": {x: 72 + 32, y: 80 + index * 10, w: 16, h: 10};
+      case "player-collect0-left": {x: 72, y: 100 + index * 10, w: 16, h: 10};
+      case "player-collect1-left": {x: 72 + 16, y: 100 + index * 10, w: 16, h: 10};
+      case "player-collect2-left": {x: 72 + 32, y: 100 + index * 10, w: 16, h: 10};
       case "player-gun0": {x: 24, y: 40 + index * 16, w: 16, h: 16};
       case "player-gun1": {x: 24 + 16, y: 40 + index * 16, w: 16, h: 16};
       case "player-gun2": {x: 24 + 32, y: 40 + index * 16, w: 16, h: 16};
@@ -29,6 +32,9 @@ class ActorVisualTools {
       case "coin1": {x: 0, y: 72 + index * 8, w: 5, h: 5};
       case "coin2": {x: 8, y: 72 + index * 8, w: 6, h: 6};
       case "coin3": {x: 16, y: 72 + index * 8, w: 7, h: 7};
+      case "coin-attack1": {x: 0, y: 80 + index * 8, w: 5, h: 8 + 5};
+      case "coin-attack2": {x: 8, y: 80 + index * 8, w: 6, h: 8 + 6};
+      case "coin-attack3": {x: 16, y: 80 + index * 8, w: 7, h: 8 + 7};
       case "enemy-collect-top": {x: 120, y: 80 + index * 16, w: 8, h: 9};
       case "enemy-collect-bottom": {x: 128, y: 80 + index * 16, w: 8, h: 9};
       case "enemy-pop1": {x: 40, y: 0 + index * 16, w: 13, h: 9};
@@ -45,15 +51,22 @@ class ActorVisualTools {
       case "enemy-cashbag": {x: 184 + index * 16, y: 0, w: 16, h: 22};
       case "ui-bottom1": {x: 0, y: 120, w: 24, h: 40};
       case "ui-bottom-slot": {x: 24 + index * 32, y: 120, w: 32, h: 40};
+      case "ui-bottom2": {x: 128, y: 120, w: 88, h: 40};
+      case "ui-bottom-level": {x: 96 + 24 * index, y: 160, w: 23, h: 15};
       case "ui-slot-icon": {x: 0 + index * 24, y: 160, w: 24, h: 24};
       case "ui-right1": {x: 216, y: 0, w: 24, h: 300 - 9};
       case "ui-right2": {x: 216, y: 300 - 9, w: 24, h: 9};
       case "ui-right-coin": {x: 240, y: 0 + index * 16, w: 24, h: 9};
       case "ui-life": {x: 0 + index * 16, y: 184, w: 16, h: 16};
       case "ui-bomb": {x: 32 + index * 16, y: 184, w: 16, h: 16};
+      case "menu-title": {x: 0, y: 240, w: 200, h: 300};
+      case "menu-logo": {x: 200, y: 304, w: 179, h: 68};
+      case "menu-star": {x: 200 + index * 16, y: 376, w: 16, h: 16};
       case "boss-icon": {x: 64, y: 184, w: 16, h: 16};
       case "boss-bar-empty": {x: 80, y: 184, w: 80, h: 8};
       case "boss-bar-full": {x: 80, y: 192, w: 80, h: 8};
+      case "level-bg": {x: 200, y: 392 + 40 * index, w: 224, h: 40};
+      case "bonus": {x: 160, y: 184, w: 32, h: 16};
       //case "ui-template": {x: 0, y: 184, w: 177, h: 37};
       case "shop-top": {x: 264, y: 0, w: 116, h: 88};
       case "shop-bottom": {x: 264, y: 88, w: 116, h: 96};

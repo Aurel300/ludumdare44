@@ -32,14 +32,25 @@ class ShopItemTools {
   }
   
   public static function price(of:ShopItem):Int return (switch (of) {
-      case Rapid: [10, 20, 30][currentLevel(of)];
-      case Mega: [15, 25][currentLevel(of)];
-      case Armour: [25, 40][currentLevel(of)];
-      case Collector: [25, 40][currentLevel(of)];
-      case Badder: [20, 10, 5][currentLevel(of)];
-      case Smoler: [20, 10, 5][currentLevel(of) - 1];
-      case Life: currentLevel(of) == 0 ? 5 : 20;
-      case Bomb: currentLevel(of) == 0 ? 5 : 20;
+      case Rapid: [20, 30, 50][currentLevel(of)];
+      case Mega: [30, 75][currentLevel(of)];
+      case Armour: [35, 90][currentLevel(of)];
+      case Collector: [65, 100][currentLevel(of)];
+      case Badder: [50, 25, 15][currentLevel(of)];
+      case Smoler: [50, 25, 15][currentLevel(of) - 1];
+      case Life: currentLevel(of) == 0 ? 5 : 30;
+      case Bomb: currentLevel(of) == 0 ? 5 : 30;
+    });
+  
+  public static function tooltip(of:ShopItem):String return (switch (of) {
+      case Rapid: '${Tx.gold()}RAPID:${Tx.normal()} shoot faster';
+      case Mega: '${Tx.gold()}MEGA:${Tx.normal()} larger bullets';
+      case Armour: '${Tx.gold()}ARMOUR:${Tx.normal()} damage resist';
+      case Collector: '${Tx.gold()}COLLECTOR:${Tx.normal()} wider funnels';
+      case Badder: '${Tx.gold()}BADDER:${Tx.normal()} harder, more score';
+      case Smoler: '${Tx.gold()}SMOLER:${Tx.normal()} easier, less score';
+      case Life: '${Tx.gold()}LIFE:${Tx.normal()} +1 life';
+      case Bomb: '${Tx.gold()}BOMB:${Tx.normal()} +1 bomb';
     });
   
   public static function currentLevel(of:ShopItem):Int return (switch (of) {

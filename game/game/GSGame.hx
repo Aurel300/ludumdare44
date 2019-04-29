@@ -9,6 +9,7 @@ class GSGame extends GameState {
   public static final GHEIGHT = 300 - 35;
   public static final MAXLIVES = 6;
   public static final MAXBOMBS = 6;
+  public static final BOMBLEN = 60 * 5;
   
   public function playerDeath():Void {
     if (playerAlive) {
@@ -30,8 +31,8 @@ class GSGame extends GameState {
       switch (types[0]) {
         case 0: DriverPlayer.powerup(MegaShot); // cherry
         case 1: DriverPlayer.powerup(RapidFire); // seven
-        case 2: lives++; // life
-        case 3: bombs++; // bomb
+        case 2: if (lives < MAXLIVES) lives++; // life
+        case 3: if (bombs < MAXBOMBS) bombs++; // bomb
       }
     } else {
       score([0, 50, 500][highest]);
@@ -42,8 +43,12 @@ class GSGame extends GameState {
     e.spawn(other);
   }
   public function score(add:Float, ?x:Float, ?y:Float):Void {
-    scoreCount += add * [.6, .8, 1.0, 1.2, 1.4][upBadness];
-    // TODO: bonus announce
+    scoreCount += add * [.7, 1.0, 1.2, 1.6][upBadness];
+    if (x != null) {
+      bonusActor.x = x.floor() - 16;
+      bonusActor.y = y.floor() - 16;
+      bonusTimer = 80;
+    }
   }
   public function particle(x:Float, y:Float, vx:Float, vy:Float):Void {
     var actor = new Actor(x.floor() - 12, y.floor() - 12, null);
@@ -70,6 +75,11 @@ class GSGame extends GameState {
   public var scoreCount:Float;
   public var playerAlive:Bool;
   public var respawnTimer:Int;
+  public var bombTimer:Int;
+  public var levelText:TextFragment;
+  public var bgs:Array<{type:Int, act:Actor}>;
+  public var bonusActor:Actor;
+  public var bonusTimer:Int;
   
   // stats and upgrades
   public var lives:Int;
@@ -79,6 +89,9 @@ class GSGame extends GameState {
   public var upArmour:Int;
   public var upBadness:Int;
   public var upCollector:Int;
+  
+  var specialBG:Array<Bitmap>;
+  var levelBG:Int;
   
   public function new() {
     I = this;
@@ -97,13 +110,13 @@ class GSGame extends GameState {
     upRapid = 0;
     upMega = 0;
     upArmour = 0;
-    upBadness = 2;
+    upBadness = 1;
     upCollector = 0;
     /*
     upRapid = 3;
     upMega = 2;
     upArmour = 2;
-    upBadness = 4;
+    upBadness = 3;
     upCollector = 2;
     */
     
@@ -111,21 +124,28 @@ class GSGame extends GameState {
     entities = [
         player = new EntityPlayer()
       ];
-    levelCount = 3;
+    levelCount = 0;
     particles = [];
     scoreCount = 0;
     playerAlive = true;
     respawnTimer = 0;
+    bombTimer = 0;
     
     UIHP.reset(player);
     UIShop.reset();
     UISlots.reset();
     UITop.reset();
     
+    bgs = [ for (i in -1...9) {type: 0, act: new Actor(-8, -8 + i * 32, "level-bg".visual(0))} ];
+    bonusActor = new Actor(0, 0, "bonus".visual());
+    bonusTimer = 0;
+    
+    levelText = new TextFragment("");
     levelStart();
   }
   
   public function levelStart(?fromShop:Bool = false):Void {
+    levelBG = 0;
     entities = [player];
     level = Level.playLevel(levelCount++);
     if (fromShop) level.prog = -3.0;
@@ -134,24 +154,45 @@ class GSGame extends GameState {
   public function levelFinish():Void {
     level = null;
     if (levelCount >= Level.levels.length) {
-      // victory screen!
+      (cast game.state("title"):GSTitle).gameOver(scoreCount.floor(), true);
     } else {
       UIShop.show(true);
     }
   }
   
   override public function to(from:GameState):Void {
+    var base = Actor.generate("level-bg".visual(3));
+    var tf = new TextFragment("");
+    specialBG = [ for (t in [
+        '${Tx.normal()}Move with the ${Tx.bold()}arrow keys
+${Tx.normal()}Shoot with the ${Tx.bold()}spacebar'
+        ,'
+${Tx.bold()}B${Tx.normal()} to bomb the bullets away'
+        ,'${Tx.normal()}Collect coins and bullets in the
+${Tx.bold()}funnels${Tx.normal()} ( on your sides )'
+        ,'${Tx.normal()}Bullets only hurt if they hit your
+${Tx.bold()}chassis${Tx.normal()} ( the green box )'
+      ]) {
+        tf.text = t;
+        var bg = base.copy();
+        bg.blitAlpha(20, 1, tf.size(190, 40));
+        bg.lock();
+      } ];
+    
+    Sfx.music(true);
     reset();
   }
   
-  override public function load():Void {
-    
+  override public function from(to:GameState):Void {
+    Sfx.music(false);
   }
   
   override public function mouse(e:MouseEvent):Void UIShop.mouse(e);
   
   override public function tick(delta:Float):Void {
-    if (level != null) level.tick(delta);
+    if (level != null) {
+      level.tick(delta);
+    }
     if (respawnTimer > 0) {
       respawnTimer++;
       if (respawnTimer == 90) {
@@ -162,10 +203,12 @@ class GSGame extends GameState {
           UIHP.reset(player);
           playerAlive = true;
         } else {
-          // actually game over!
+          (cast game.state("title"):GSTitle).gameOver(scoreCount.floor(), false);
+          return;
         }
       }
     }
+    if (bombTimer > 0) bombTimer--;
     
     js.Browser.document.getElementById("fps").innerText = 'HP: ${player.hp} ENT: ${entities.length} FPS: ${1000.0 / delta}';
     
@@ -176,7 +219,27 @@ class GSGame extends GameState {
         else !e.rem;
       });
     
-    win.fill(Colour.fromARGB32(0xFFAA0000));
+    //win.fill(Colour.fromARGB32(0xFFAA0000));
+    var parallax = (player.x - 20) / (GSGame.GWIDTH - 40);
+    bgs = [ for (bg in bgs) {
+        bg.act.x = (-8 - parallax * 32).floor();
+        bg.act.render(win);
+        bg.act.y += 1;
+        if (bg.act.y > 280) continue;
+        bg;
+      } ];
+    if (bgs[0].act.y >= -8) {
+      levelBG++;
+      var act = new Actor(-8, bgs[0].act.y - 32, "level-bg".visual(levelCount - 1));
+      var si = [1, 6, 11, 16].indexOf(levelBG);
+      if (levelCount == 1 && si != -1) {
+        act.bmp = specialBG[si];
+      }
+      bgs.unshift({
+           type: 0
+          ,act: act
+        });
+    }
     for (entity in entities) entity.render(win, GX + cameraX.tick(), GY + cameraY.tick());
     
     particles = [ for (p in particles) {
@@ -188,6 +251,12 @@ class GSGame extends GameState {
         if (++p.ph >= 32) continue;
         p;
       } ];
+    
+    if (bonusTimer > 0) {
+      bonusActor.render(win);
+      if (bonusTimer % 3 == 0) bonusActor.y--;
+      bonusTimer--;
+    }
     
     Sfx.tick();
     UIHP.tick();
@@ -209,14 +278,26 @@ class GSGame extends GameState {
       var fillBar = 1 + ((totalHp / totalInit) * 78).floor();
       "boss-icon".singleton(22, 14).render(win);
       "boss-bar-empty".singleton(40, 16).render(win);
-      "boss-bar-full".singleton(40, 16).renderClip(win, 0, 0, 0, 0, fillBar, 8);
+      "boss-bar-full".singleton(40, 16).renderClip(win, 0, 0, 0, 0, fillBar.max(1), 8);
     }
+    if (level != null && level.prog < 3) {
+      var levelNum = ["1", "2", "2.5", "3", "4"][levelCount - 1];
+      levelText.text = '${Tx.normal()}Level ${levelNum}: ${Tx.gold()}${level.name}';
+    } else levelText.text = UIShop.tooltip;
+    win.blitAlpha(2, Main.VHEIGHT - 37 - 13, levelText.size(200, 20));
     "ui-bottom1".singleton(0, Main.VHEIGHT - 37).render(win);
+    "ui-bottom2".singleton(93, Main.VHEIGHT - 37).render(win);
+    "ui-bottom-level".singleton(93 + 50, Main.VHEIGHT - 37 + 19, (levelCount - 1).min(4)).render(win);
     UISlots.render(win);
   }
   
   override public function keyboard(e:KeyboardEvent) switch (e) {
     case Up(KeyR): reset();
+    case Up(KeyB) if (bombTimer == 0 && bombs > 0 && playerAlive):
+    Sfx.play("bomb_alt");
+    bombs--;
+    for (e in entities) if (e.id == "bullet") e.rem = true;
+    bombTimer = BOMBLEN;
     case _:
   }
 }

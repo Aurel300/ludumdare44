@@ -4,7 +4,8 @@ class Actor {
   static function reload():Void {
     var c = Platform.assets.bitmaps["actor"];
     BMP_SOURCE = c;
-    PAL = c.cut(0, 104, 64, 1).palette();
+    var palSrc = c.cut(0, 112, 64, 1).get();
+    PAL = [ for (i in 0...14) palSrc[i * 3] ];
     BMP_SLOT_ICONS = Bitmap.fromColour(24, 24 * UISlots.SLOT_TYPES * 2, 0);
     for (i in 0...UISlots.SLOT_TYPES * 2) {
       BMP_SLOT_ICONS.blitAlphaRect(0, i * 24, (i % UISlots.SLOT_TYPES) * 24, 160, 24, 24, BMP_SOURCE);
@@ -13,7 +14,7 @@ class Actor {
     BMP_SLOT_ICONS.lock();
     if (PARTICLES == null) {
       PARTICLES = [];
-      var curve = c.getRect(0, 88, 16, 16);
+      var curve = c.getRect(0, 96, 16, 16);
       var ci = 0;
       var steps = [ for (y in 0...16) {
           var min = 16;

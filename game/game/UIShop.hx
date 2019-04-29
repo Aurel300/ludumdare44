@@ -2,6 +2,7 @@ package game;
 
 class UIShop {
   public static var showing:Bitween = new Bitween(90);
+  public static var tooltip:String = "";
   static var shopUI:UI;
   static var text:TextFragment;
   static var buyCD:Int;
@@ -118,8 +119,15 @@ class UIShop {
     
     if (buyCD > 0) buyCD--;
     
-    if (shopUI.hoverName != null && shopUI.hoverName.startsWith("slot")) costText(items[shopUI.hoverName.charCodeAt(4) - "0".code].item.price());
-    else costText();
+    tooltip = "";
+    if (shopUI.hoverName != null && shopUI.hoverName.startsWith("slot")) {
+      var idx = shopUI.hoverName.charCodeAt(4) - "0".code;
+      if (idx < items.length) {
+        costText(items[idx].item.price());
+        tooltip = items[idx].item.tooltip();
+      }
+    } else costText();
+    if (shopUI.hoverName == "button") tooltip = '${Tx.gold()}START NEXT LEVEL!';
     
     "shop-bottom".singleton(bottomX, bottomY).render(to);
     "shop-button".singleton(

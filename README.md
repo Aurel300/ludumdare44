@@ -27,15 +27,4 @@
 
 ## TODO ##
 
- - . UI
-   - . level indicator
-   - - different types of coins
-   - - bonus points indicators
-   - - menu, intro, outro?
- - - leaderboards
- - - enemies
-   - - badness
- - . GFX
-   - - backgrounds
- - . SFX - throttle!
- - - music
+ - **page**
